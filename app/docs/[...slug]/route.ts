@@ -11,15 +11,8 @@ export async function GET(
   try {
     const { slug } = params
     
-    // Construct the file path - add .md extension if not present
-    let filePath: string
-    const lastSegment = slug[slug.length - 1]
-    
-    if (lastSegment?.endsWith('.md')) {
-      filePath = path.join(docsDirectory, ...slug)
-    } else {
-      filePath = path.join(docsDirectory, ...slug) + '.md'
-    }
+    // Construct the file path - always add .md extension
+    const filePath = path.join(docsDirectory, ...slug) + '.md'
     
     // Check if file exists
     if (!fs.existsSync(filePath)) {
