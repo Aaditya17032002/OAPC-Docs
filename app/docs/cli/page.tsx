@@ -370,15 +370,6 @@ export default function CliPage() {
         <p className="text-xl text-muted-foreground leading-relaxed">
           The OACP Command Line Interface provides comprehensive tools for managing environments, monitoring workflows, and interacting with OACP systems.
         </p>
-        <div className="mt-4 p-4 bg-muted/50 rounded-lg border">
-          <p className="text-sm text-muted-foreground">
-            📖 <strong>Complete Reference:</strong> Access the comprehensive CLI commands documentation as{' '}
-            <a href="/docs/cli/commands.md" className="text-primary hover:underline font-mono">
-              raw markdown file
-            </a>{' '}
-            for easy parsing by AI models and crawlers.
-          </p>
-        </div>
       </div>
 
       {/* Quick Reference */}
