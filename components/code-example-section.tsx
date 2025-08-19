@@ -13,7 +13,7 @@ export function MyComponent() {
   return (
     <Card className="p-6">
       <h2 className="text-2xl font-bold mb-4">
-        Welcome to OAPC Docs
+        Welcome to OACP Docs
       </h2>
       <p className="text-muted-foreground mb-4">
         Get started with our beautiful components

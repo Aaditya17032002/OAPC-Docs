@@ -13,7 +13,7 @@ export function LandingFooter() {
           </div>
 
           <div className="flex items-center gap-8 text-sm text-muted-foreground">
-            <a href="https://github.com/Aaditya17032002/OAPC" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
+            <a href="https://github.com/Aaditya17032002/OACP" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
               GitHub
             </a>
             <a href="#" className="hover:text-primary transition-colors">

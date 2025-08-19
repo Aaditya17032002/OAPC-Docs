@@ -20,7 +20,7 @@ export function DocsHeader() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
               <Zap className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold">OAPC Docs</span>
+            <span className="text-xl font-bold">OACP Docs</span>
           </div>
           <Badge variant="secondary" className="hidden sm:inline-flex">
             v2.0

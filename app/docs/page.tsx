@@ -1,17 +1,8 @@
-import { DocsHeader } from "@/components/docs-header"
-import { DocsSidebar } from "@/components/docs-sidebar"
-import { TableOfContents } from "@/components/table-of-contents"
+import { Rocket, Lightbulb, Target, Vote, Brain, FileText, Plug, Settings } from "lucide-react"
 
 export default function DocsPage() {
   return (
-    <div className="h-screen bg-background flex flex-col">
-      <DocsHeader />
-      <div className="flex flex-1 h-0">
-        <DocsSidebar />
-        <main className="flex-1 overflow-y-auto">
-          <div className="px-6 py-12">
-            <div className="max-w-6xl mx-auto flex gap-12">
-              <div className="flex-1 min-w-0">
+    <>
             {/* Header */}
             <div className="mb-12">
               <h1 className="text-4xl font-black mb-4 gradient-text">Open Agent Compliance Protocol</h1>
@@ -27,7 +18,7 @@ export default function DocsPage() {
                 <div className="border-2 hover:shadow-lg transition-all duration-300 rounded-lg p-6 h-full group-hover:border-primary/50">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <span className="text-lg">🚀</span>
+                      <Rocket className="h-5 w-5 text-primary" />
                     </div>
                     <h3 className="text-xl font-bold">Quick Start</h3>
                   </div>
@@ -44,7 +35,7 @@ export default function DocsPage() {
                 <div className="border-2 hover:shadow-lg transition-all duration-300 rounded-lg p-6 h-full group-hover:border-primary/50">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <span className="text-lg">💡</span>
+                      <Lightbulb className="h-5 w-5 text-primary" />
                     </div>
                     <h3 className="text-xl font-bold">Examples</h3>
                   </div>
@@ -62,17 +53,26 @@ export default function DocsPage() {
             <section className="mb-12">
               <h2 className="text-3xl font-bold mb-6">Core Concepts</h2>
               <div className="grid gap-6">
-                <a href="/docs/decorators" className="block p-4 border rounded-lg hover:bg-muted/50 transition-colors group">
-                  <h3 className="font-semibold mb-2 group-hover:text-primary">🎯 Decorators →</h3>
-                  <p className="text-sm text-muted-foreground">Add OACP governance to functions with @with_oacp and wrap_node decorators.</p>
+                <a href="/docs/decorators" className="flex items-center gap-3 p-4 border rounded-lg hover:bg-muted/50 transition-colors group">
+                  <Target className="h-5 w-5 text-primary" />
+                  <div>
+                    <h3 className="font-semibold mb-1 group-hover:text-primary">Decorators →</h3>
+                    <p className="text-sm text-muted-foreground">Add OACP governance to functions with @with_oacp and wrap_node decorators.</p>
+                  </div>
                 </a>
-                <a href="/docs/voting-strategies" className="block p-4 border rounded-lg hover:bg-muted/50 transition-colors group">
-                  <h3 className="font-semibold mb-2 group-hover:text-primary">🗳️ Voting & Consensus →</h3>
-                  <p className="text-sm text-muted-foreground">Decision contracts, voting strategies, and consensus mechanisms for agent coordination.</p>
+                <a href="/docs/voting-strategies" className="flex items-center gap-3 p-4 border rounded-lg hover:bg-muted/50 transition-colors group">
+                  <Vote className="h-5 w-5 text-primary" />
+                  <div>
+                    <h3 className="font-semibold mb-1 group-hover:text-primary">Voting & Consensus →</h3>
+                    <p className="text-sm text-muted-foreground">Decision contracts, voting strategies, and consensus mechanisms for agent coordination.</p>
+                  </div>
                 </a>
-                <a href="/docs/storage-backends" className="block p-4 border rounded-lg hover:bg-muted/50 transition-colors group">
-                  <h3 className="font-semibold mb-2 group-hover:text-primary">💾 Event Storage →</h3>
-                  <p className="text-sm text-muted-foreground">File, SQLite, and PostgreSQL storage backends for audit trails and event logging.</p>
+                <a href="/docs/storage-backends" className="flex items-center gap-3 p-4 border rounded-lg hover:bg-muted/50 transition-colors group">
+                  <Settings className="h-5 w-5 text-primary" />
+                  <div>
+                    <h3 className="font-semibold mb-1 group-hover:text-primary">Event Storage →</h3>
+                    <p className="text-sm text-muted-foreground">File, SQLite, and PostgreSQL storage backends for audit trails and event logging.</p>
+                  </div>
                 </a>
               </div>
             </section>
@@ -82,25 +82,37 @@ export default function DocsPage() {
               <h2 className="text-3xl font-bold mb-6">Key Features</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="border rounded-lg p-6">
-                  <h3 className="text-xl font-semibold mb-3">🗳️ Democratic Voting</h3>
+                  <div className="flex items-center gap-3 mb-3">
+                    <Vote className="h-6 w-6 text-primary" />
+                    <h3 className="text-xl font-semibold">Democratic Voting</h3>
+                  </div>
                   <p className="text-muted-foreground">
                     Unanimous, majority, and weighted voting strategies for agent consensus decisions.
                   </p>
                 </div>
                 <div className="border rounded-lg p-6">
-                  <h3 className="text-xl font-semibold mb-3">🧠 Adaptive Prompting</h3>
+                  <div className="flex items-center gap-3 mb-3">
+                    <Brain className="h-6 w-6 text-primary" />
+                    <h3 className="text-xl font-semibold">Adaptive Prompting</h3>
+                  </div>
                   <p className="text-muted-foreground">
                     Learn from rejection feedback to automatically improve prompts and reduce consensus failures.
                   </p>
                 </div>
                 <div className="border rounded-lg p-6">
-                  <h3 className="text-xl font-semibold mb-3">📋 Audit Trails</h3>
+                  <div className="flex items-center gap-3 mb-3">
+                    <FileText className="h-6 w-6 text-primary" />
+                    <h3 className="text-xl font-semibold">Audit Trails</h3>
+                  </div>
                   <p className="text-muted-foreground">
                     Complete traceability with event logging, vote tracking, and governance compliance.
                   </p>
                 </div>
                 <div className="border rounded-lg p-6">
-                  <h3 className="text-xl font-semibold mb-3">🔌 LangGraph Integration</h3>
+                  <div className="flex items-center gap-3 mb-3">
+                    <Plug className="h-6 w-6 text-primary" />
+                    <h3 className="text-xl font-semibold">LangGraph Integration</h3>
+                  </div>
                   <p className="text-muted-foreground">
                     Simple decorator-based integration with existing LangGraph workflows and nodes.
                   </p>
@@ -123,16 +135,6 @@ pip install -e .`}</code>
                 Ready to start building? Check out our <a href="/docs/quickstart" className="text-primary hover:underline">Quick Start Guide</a> for detailed setup instructions or visit our <a href="https://github.com/Aaditya17032002/OACP" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">GitHub repository</a>.
               </p>
             </section>
-              </div>
-              <div className="w-64 shrink-0 hidden xl:block">
-                <div className="sticky top-6 max-h-[calc(100vh-8rem)] overflow-y-auto">
-                  <TableOfContents />
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
-      </div>
-    </div>
+    </>
   )
 }

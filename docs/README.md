@@ -2,47 +2,47 @@
 
 Welcome to the comprehensive documentation for **OACP (Open Agent Compliance Protocol)** - the governance layer for LangGraph that adds democratic decision-making, consensus mechanisms, and audit trails to multi-agent workflows.
 
-## 🚀 **Quick Navigation**
+## Quick Navigation
 
-### **Getting Started**
-- [📖 Overview](overview.md) - What is OACP and why use it?
-- [⚡ Quick Start](quickstart.md) - Get running in 5 minutes
-- [💾 Installation](installation.md) - Complete installation guide
-- [⚙️ Configuration](configuration.md) - Environment setup
+### Getting Started
+- [Overview](overview.md) - What is OACP and why use it?
+- [Quick Start](quickstart.md) - Get running in 5 minutes
+- [Installation](installation.md) - Complete installation guide
+- [Configuration](configuration.md) - Environment setup
 
-### **Core Features**
-- [🗳️ Voting Strategies](features/voting-strategies.md) - Democratic decision-making
-- [🧠 Adaptive Prompting](features/adaptive-prompting.md) - AI learns from feedback
-- [📊 Audit Trails](features/audit-trails.md) - Complete transparency
-- [🤝 Consensus Mechanisms](features/consensus.md) - How agents agree
+### Core Features
+- [Voting Strategies](features/voting-strategies.md) - Democratic decision-making
+- [Adaptive Prompting](features/adaptive-prompting.md) - AI learns from feedback
+- [Audit Trails](features/audit-trails.md) - Complete transparency
+- [Consensus Mechanisms](features/consensus.md) - How agents agree
 
-### **API Reference**
-- [🎯 Decorators](api/decorators.md) - @with_oacp and function governance
-- [📋 Contracts](api/contracts.md) - DecisionContract configuration
-- [💾 Storage Backends](api/storage-backends.md) - File, SQLite, PostgreSQL
-- [📡 Events System](api/events.md) - Comprehensive event tracking
+### API Reference
+- [Decorators](api/decorators.md) - @with_oacp and function governance
+- [Contracts](api/contracts.md) - DecisionContract configuration
+- [Storage Backends](api/storage-backends.md) - File, SQLite, PostgreSQL
+- [Events System](api/events.md) - Comprehensive event tracking
 
-### **Web Dashboard & API**
-- [🌐 Dashboard](web/dashboard.md) - Real-time monitoring interface
-- [🔌 REST API](web/api.md) - Complete API reference
-- [⚡ WebSocket](web/websockets.md) - Real-time streaming
-- [💻 CLI Tools](cli/commands.md) - Command-line interface
+### Web Dashboard & API
+- [Dashboard](web/dashboard.md) - Real-time monitoring interface
+- [REST API](web/api.md) - Complete API reference
+- [WebSocket](web/websockets.md) - Real-time streaming
+- [CLI Tools](cli/commands.md) - Command-line interface
 
-### **Examples & Tutorials**
-- [📝 Basic Usage](examples/basic-usage.md) - Simple implementations
-- [🔬 Research Team](examples/research-team.md) - Multi-agent workflows
-- [🎮 Flappy Bird Sim](examples/flappy-bird.md) - Game design validation
-- [🏭 Production Deployment](examples/production.md) - Enterprise setup
+### Examples & Tutorials
+- [Basic Usage](examples/basic-usage.md) - Simple implementations
+- [Research Team](examples/research-team.md) - Multi-agent workflows
+- [Flappy Bird Sim](examples/flappy-bird.md) - Game design validation
+- [Production Deployment](examples/production.md) - Enterprise setup
 
-### **Integration Guides**
-- [🔗 LangGraph Integration](integrations/langgraph.md) - Deep workflow integration
-- [🤖 OpenAI Integration](integrations/openai.md) - GPT models
-- [🧠 Anthropic Integration](integrations/anthropic.md) - Claude models
-- [🔮 Google AI Integration](integrations/google-ai.md) - Gemini models
+### Integration Guides
+- [LangGraph Integration](integrations/langgraph.md) - Deep workflow integration
+- [OpenAI Integration](integrations/openai.md) - GPT models
+- [Anthropic Integration](integrations/anthropic.md) - Claude models
+- [Google AI Integration](integrations/google-ai.md) - Gemini models
 
-## 🎯 **What Makes OACP Special?**
+## What Makes OACP Special?
 
-### **Democratic AI Governance**
+### Democratic AI Governance
 ```python
 @with_oacp(
     role="content_writer",
@@ -101,7 +101,7 @@ def synthesize(verified_research): ...
 - Benefit analysis with weighted voting
 - Final recommendations with expert review
 
-## 🌐 **Web Dashboard Features**
+## Web Dashboard Features
 
 ### **Real-time Monitoring**
 - Live workflow execution tracking
@@ -151,7 +151,7 @@ oacp config                  # Show current config
 oacp env status             # Environment status
 ```
 
-## 🏗️ **Architecture Overview**
+## Architecture Overview
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -186,7 +186,7 @@ oacp env status             # Environment status
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## 📊 **Key Benefits**
+## Key Benefits
 
 ### **For Developers**
 - ✅ **Simple Integration** - Just add decorators
@@ -206,7 +206,7 @@ oacp env status             # Environment status
 - ✅ **Risk Management** - Consensus prevents single points of failure
 - ✅ **Scalability** - Enterprise-grade storage and monitoring
 
-## 🚀 **Getting Started in 3 Steps**
+## Getting Started in 3 Steps
 
 ### **1. Install OACP**
 ```bash
@@ -281,7 +281,7 @@ OACP is open source and welcomes contributions:
 - **🐛 Issues**: Report bugs and request features
 - **📧 Contact**: Reach out through GitHub
 
-## 🎯 **What's Next?**
+## What's Next?
 
 ### **Immediate Next Steps**
 1. **[Install OACP](installation.md)** - Get up and running
@@ -299,7 +299,7 @@ OACP is open source and welcomes contributions:
 
 **Ready to build more reliable, transparent, and democratic AI systems?**
 
-🚀 **[Get Started Now](quickstart.md)** | 📚 **[Browse Examples](examples/)** | 🌐 **[Try Dashboard](web/dashboard.md)**
+**[Get Started Now](quickstart.md)** | **[Browse Examples](examples/)** | **[Try Dashboard](web/dashboard.md)**
 
 ---
 

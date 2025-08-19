@@ -53,7 +53,7 @@ export function LandingHeader() {
           </Button>
 
           <Button variant="ghost" size="icon" asChild>
-            <a href="https://github.com/Aaditya17032002/OAPC" target="_blank" rel="noopener noreferrer">
+            <a href="https://github.com/Aaditya17032002/OACP" target="_blank" rel="noopener noreferrer">
               <Github className="h-4 w-4" />
             </a>
           </Button>
