@@ -1,14 +1,6 @@
-import { DocsHeader } from "@/components/docs-header"
-import { DocsSidebar } from "@/components/docs-sidebar"
-
 export default function AgentsPage() {
   return (
-    <div className="min-h-screen bg-background">
-      <DocsHeader />
-      <div className="flex">
-        <DocsSidebar />
-        <main className="flex-1 max-w-none">
-          <div className="container mx-auto px-6 py-12 max-w-4xl">
+    <>
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-4xl font-black mb-4 gradient-text">Agents</h1>
@@ -160,9 +152,6 @@ results = agent.process_batch([
             </div>
           </div>
         </section>
-          </div>
-        </main>
-      </div>
-    </div>
+    </>  
   )
 }
