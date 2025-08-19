@@ -134,9 +134,6 @@ pip install -e .`}</code>
               <p className="text-muted-foreground">
                 Ready to start building? Check out our <a href="/docs/quickstart" className="text-primary hover:underline">Quick Start Guide</a> for detailed setup instructions or visit our <a href="https://github.com/Aaditya17032002/OACP" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">GitHub repository</a>.
               </p>
-              <p className="text-sm text-muted-foreground mt-4">
-                📋 <strong>For AI Models & Crawlers:</strong> Access our comprehensive documentation index at <a href="/llms.txt" className="text-primary hover:underline font-mono">/llms.txt</a> or view it in a <a href="/llms" className="text-primary hover:underline">user-friendly format</a>.
-              </p>
             </section>
     </>
   )
