@@ -1,0 +1,104 @@
+# OACP (Open Agent Compliance Protocol) - AI Documentation Index
+
+This file provides a comprehensive index of all OACP documentation for AI models and crawlers.
+OACP is a governance layer for LangGraph that adds voting, consensus, and audit trails to multi-agent workflows.
+
+## 🏠 Main Documentation
+- **Overview**: /docs/overview.md - Complete project overview and introduction
+- **Quick Start**: /docs/quickstart.md - Getting started guide with examples
+- **Installation**: /docs/installation.md - Detailed installation instructions
+- **Configuration**: /docs/configuration.md - Environment and configuration setup
+
+## 🎯 Core Features
+- **Governance Layer**: /docs/features/governance.md - Democratic decision-making for agents
+- **Voting Strategies**: /docs/features/voting-strategies.md - Unanimous, majority, and weighted voting
+- **Adaptive Prompting**: /docs/features/adaptive-prompting.md - Automatic prompt improvement
+- **Audit Trails**: /docs/features/audit-trails.md - Complete logging and tracking
+- **Consensus Mechanisms**: /docs/features/consensus.md - How agents reach agreements
+- **Error Handling**: /docs/features/error-handling.md - Retry logic and fallback mechanisms
+
+## 🛠️ Technical Documentation
+- **Decorators**: /docs/api/decorators.md - @with_oacp and function decorators
+- **Contracts**: /docs/api/contracts.md - DecisionContract and voting requirements
+- **Storage Backends**: /docs/api/storage-backends.md - File, SQLite, PostgreSQL support
+- **Events System**: /docs/api/events.md - Comprehensive event tracking
+- **Context Management**: /docs/api/context.md - Execution context and state
+- **LLM Integration**: /docs/api/llm-integration.md - Language model adapters
+
+## 🌐 Web Dashboard & API
+- **Web Dashboard**: /docs/web/dashboard.md - Real-time monitoring interface
+- **REST API**: /docs/web/api.md - Complete API reference
+- **WebSocket**: /docs/web/websockets.md - Real-time streaming
+
+## 💻 CLI Tools & Commands
+- **CLI Overview**: /docs/cli/commands.md - Complete command-line interface reference
+- **Environment Commands**: /docs/cli/commands.md#environment-management-commands - Setup and configuration
+- **Monitoring Commands**: /docs/cli/commands.md#monitoring--analysis-commands - System monitoring and stats
+- **Log Management**: /docs/cli/commands.md#log-management-commands - Log streaming and analysis
+- **Web Dashboard CLI**: /docs/cli/commands.md#web-dashboard-commands - Dashboard server management
+- **Advanced CLI Features**: /docs/cli/commands.md#advanced-commands - Replay and debugging tools
+
+## 📚 Examples & Tutorials
+- **Basic Usage**: /docs/examples/basic-usage.md - Simple OACP implementation
+- **Research Team**: /docs/examples/research-team.md - Multi-agent research workflow
+- **Flappy Bird Sim**: /docs/examples/flappy-bird.md - Game design with component validation
+- **Custom Voting**: /docs/examples/custom-voting.md - Implementing custom voting strategies
+- **Production Deployment**: /docs/examples/production.md - Production-ready configurations
+
+## 🏗️ Architecture & Design
+- **Architecture Overview**: /docs/architecture/overview.md - System architecture and components
+- **Data Flow**: /docs/architecture/data-flow.md - How data moves through OACP
+- **Storage Architecture**: /docs/architecture/storage.md - Storage system design
+- **Security Model**: /docs/architecture/security.md - Security considerations and best practices
+
+## 🚀 Integration Guides
+- **LangGraph Integration**: /docs/integrations/langgraph.md - Deep integration with LangGraph
+- **OpenAI Integration**: /docs/integrations/openai.md - Using with OpenAI models
+- **Anthropic Integration**: /docs/integrations/anthropic.md - Using with Claude models
+- **Google AI Integration**: /docs/integrations/google-ai.md - Using with Gemini models
+- **Custom LLM Integration**: /docs/integrations/custom-llm.md - Integrating custom models
+
+## 🔧 Development & Contributing
+- **Development Setup**: /docs/development/setup.md - Setting up development environment
+- **Contributing Guide**: /docs/development/contributing.md - How to contribute to OACP
+- **Code of Conduct**: /docs/development/code-of-conduct.md - Community guidelines
+- **Testing Guide**: /docs/development/testing.md - Running and writing tests
+- **Release Process**: /docs/development/releases.md - How releases are managed
+
+## 📊 Use Cases & Case Studies
+- **Multi-Agent Workflows**: /docs/use-cases/multi-agent.md - Complex agent coordination
+- **Quality Assurance**: /docs/use-cases/quality-assurance.md - Using OACP for QA
+- **Research Automation**: /docs/use-cases/research.md - Automated research workflows
+- **Content Generation**: /docs/use-cases/content-generation.md - Collaborative content creation
+- **Decision Support**: /docs/use-cases/decision-support.md - AI-assisted decision making
+
+## 🔍 Troubleshooting & FAQ
+- **Common Issues**: /docs/troubleshooting/common-issues.md - Frequently encountered problems
+- **FAQ**: /docs/troubleshooting/faq.md - Frequently asked questions
+- **Performance Tuning**: /docs/troubleshooting/performance.md - Optimizing OACP performance
+- **Debugging Guide**: /docs/troubleshooting/debugging.md - How to debug OACP issues
+
+## 📋 Reference Materials
+- **API Reference**: /docs/reference/api.md - Complete API documentation
+- **Configuration Reference**: /docs/reference/config.md - All configuration options
+- **Event Types**: /docs/reference/events.md - All event types and their structure
+- **Error Codes**: /docs/reference/errors.md - Error codes and their meanings
+- **Glossary**: /docs/reference/glossary.md - Terms and definitions
+
+## 🎯 Project Information
+- **GitHub Repository**: https://github.com/Aaditya17032002/OACP
+- **PyPI Package**: https://pypi.org/project/OACP/
+- **License**: MIT License
+- **Version**: 0.1.6
+- **Python Support**: 3.10+
+
+## 📞 Contact & Community
+- **Issues**: https://github.com/Aaditya17032002/OACP/issues
+- **Discussions**: https://github.com/Aaditya17032002/OACP/discussions
+- **Author**: Aditya Jangam <aditya@adityajangam.com>
+
+---
+
+This documentation is designed to be comprehensive and accessible to both humans and AI models.
+Each markdown file contains detailed information about its specific topic with examples and code snippets.
+For the most up-to-date information, always refer to the GitHub repository and PyPI package.

@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { ChevronDown, ChevronRight, BookOpen, Code, Layers, Zap, HelpCircle } from "lucide-react"
+import { ChevronDown, ChevronRight, BookOpen, Code, Layers, Zap, Terminal } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 
@@ -57,13 +57,15 @@ const sidebarItems: SidebarItem[] = [
     ],
   },
   {
-    title: "API Reference",
-    icon: <HelpCircle className="h-4 w-4" />,
+    title: "CLI Commands",
+    icon: <Terminal className="h-4 w-4" />,
     children: [
-      { title: "Agent API", href: "/docs/api/agents" },
-      { title: "AgentSystem API", href: "/docs/api/systems" },
-      { title: "Storage API", href: "/docs/api/storage" },
-      { title: "Voting API", href: "/docs/api/voting" },
+      { title: "Overview", href: "/docs/cli" },
+      { title: "Environment Setup", href: "/docs/cli#environment-commands" },
+      { title: "Monitoring", href: "/docs/cli#monitoring-commands" },
+      { title: "Log Management", href: "/docs/cli#log-management" },
+      { title: "Web Dashboard", href: "/docs/cli#web-dashboard" },
+      { title: "Advanced Commands", href: "/docs/cli#advanced-commands" },
     ],
   },
 ]
