@@ -42,31 +42,34 @@ export function LandingHero() {
 
           {/* CTA Buttons */}
           <div
-            className="animate-slide-up flex flex-col items-center gap-8 sm:flex-row sm:justify-center sm:gap-16"
+            className="animate-slide-up flex flex-col md:flex-row justify-center items-center w-full max-w-4xl mx-auto"
             style={{ animationDelay: "0.4s" }}
           >
-            <div className="flex-shrink-0">
-              <Link href="/docs">
+            <div className="mb-4 md:mb-0 md:mr-8 w-full md:w-auto flex justify-center">
+              <Link href="/docs" className="block">
                 <Button
                   size="lg"
-                  className="group px-10 py-4 text-lg shadow-xl hover:shadow-2xl transition-all duration-300 w-full sm:w-auto"
+                  className="group px-8 py-4 text-lg shadow-xl hover:shadow-2xl transition-all duration-300 w-full whitespace-nowrap"
+                  style={{ minWidth: '280px' }}
                 >
-                  <BookOpen className="mr-3 h-5 w-5" />
-                  Explore Documentation
-                  <ArrowRight className="ml-3 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  <BookOpen className="mr-3 h-5 w-5 flex-shrink-0" />
+                  Get Started with OACP
+                  <ArrowRight className="ml-3 h-5 w-5 flex-shrink-0 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
             </div>
-            <div className="flex-shrink-0">
+            
+            <div className="w-full md:w-auto flex justify-center">
               <Button
                 variant="outline"
                 size="lg"
-                className="px-10 py-4 text-lg bg-card/50 backdrop-blur-sm border-2 hover:bg-card/80 transition-all duration-300 w-full sm:w-auto"
+                className="px-8 py-4 text-lg bg-card/50 backdrop-blur-sm border-2 hover:bg-card/80 transition-all duration-300 w-full whitespace-nowrap"
+                style={{ minWidth: '200px' }}
                 asChild
               >
-                <a href="https://github.com/Aaditya17032002/OACP_Package" target="_blank" rel="noopener noreferrer">
-                  <Code className="mr-3 h-5 w-5" />
-                  View on GitHub
+                <a href="https://github.com/Aaditya17032002/OACP_Package" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
+                  <Code className="mr-3 h-5 w-5 flex-shrink-0" />
+                  View Examples
                 </a>
               </Button>
             </div>
