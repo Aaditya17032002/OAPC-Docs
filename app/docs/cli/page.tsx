@@ -377,7 +377,7 @@ export default function CliPage() {
               comprehensive CLI commands reference
             </a>{' '}
             or access the{' '}
-            <a href="/docs/cli/commands.md" className="text-primary hover:underline font-mono text-xs">
+            <a href="/api/docs/cli/commands" className="text-primary hover:underline font-mono text-xs">
               raw markdown file
             </a>.
           </p>

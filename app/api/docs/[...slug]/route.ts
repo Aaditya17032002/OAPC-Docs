@@ -11,13 +11,15 @@ export async function GET(
   try {
     const { slug } = params
     
-    // Only serve .md files
-    if (!slug[slug.length - 1]?.endsWith('.md')) {
-      return new NextResponse('Not Found', { status: 404 })
-    }
+    // Construct the file path - add .md extension if not present
+    let filePath: string
+    const lastSegment = slug[slug.length - 1]
     
-    // Construct the file path
-    const filePath = path.join(docsDirectory, ...slug)
+    if (lastSegment?.endsWith('.md')) {
+      filePath = path.join(docsDirectory, ...slug)
+    } else {
+      filePath = path.join(docsDirectory, ...slug) + '.md'
+    }
     
     // Check if file exists
     if (!fs.existsSync(filePath)) {
