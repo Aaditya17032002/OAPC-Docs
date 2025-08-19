@@ -1,547 +1,418 @@
-# OACP Quick Start Guide
+# Quick Start Guide
 
-Get up and running with OACP (Open Agent Compliance Protocol) in just a few minutes. This guide will walk you through installation, basic setup, and your first governed multi-agent workflow.
+Get up and running with OACP in minutes. This guide walks you through installation, basic usage, and your first multi-agent workflow with governance.
+
+## Prerequisites
+
+- Python 3.10 or higher
+- Basic familiarity with Python decorators
+- Optional: LangGraph for workflow integration
 
 ## Installation
 
-### Prerequisites
-- Python 3.10 or higher
-- pip package manager
-
-### Install OACP
+Install OACP from PyPI:
 
 ```bash
-# Basic installation
 pip install OACP
-
-# With web dashboard support
-pip install OACP[web]
-
-# With PostgreSQL support
-pip install OACP[postgres]
-
-# Full installation with all features
-pip install OACP[web,postgres]
 ```
 
-### Verify Installation
+For development with all optional dependencies:
 
 ```bash
-# Check OACP CLI
-oacp --help
-
-# Check version
-python -c "import oacp; print(oacp.__version__)"
+pip install OACP[postgres,web,dev]
 ```
 
-## Environment Setup
+## Basic Example
 
-### Automatic Setup
-
-```bash
-# Interactive environment setup
-oacp env setup
-
-# Global configuration (recommended)
-oacp env setup --global
-```
-
-This will:
-- ✅ Create configuration files
-- ✅ Set up storage backend
-- ✅ Generate environment templates
-- ✅ Configure logging
-
-### Manual Setup
-
-Create a `.env` file in your project directory:
-
-```bash
-# OACP Configuration
-OACP_STORAGE_URI=file://logs
-OACP_LOG_LEVEL=INFO
-OACP_ENABLE_ADAPTIVE_PROMPTING=true
-
-# Add your API keys
-OPENAI_API_KEY=your_openai_key_here
-GOOGLE_API_KEY=your_google_key_here
-```
-
-## Your First OACP Agent
-
-### Simple Example
-
-Create a file called `my_first_oacp.py`:
+Let's create a simple governed function:
 
 ```python
-"""
-My First OACP Agent - A simple example with voting
-"""
+from oacp import with_oacp, decision_contract, vote, VoteDecision
 
-import os
-from oacp import with_oacp, DecisionContract, VotingStrategy
-
-# Optional: Set up your LLM client
-# from openai import OpenAI
-# client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-
+# Step 1: Create a governed function
 @with_oacp(
-    role="content_writer",
-    contract=DecisionContract(
-        voting_strategy=VotingStrategy.MAJORITY,
-        min_votes=2,
-        timeout_seconds=30
-    ),
-    adaptive_prompting=True
-)
-def write_content(topic: str):
-    """Write content about a given topic with OACP governance."""
-    
-    # Your content generation logic here
-    # For this example, we'll use a simple template
-    content = f"""
-    # {topic}
-    
-    This is a comprehensive article about {topic}. 
-    
-    ## Key Points
-    - Important aspect 1
-    - Important aspect 2  
-    - Important aspect 3
-    
-    ## Conclusion
-    {topic} is an important subject that deserves careful consideration.
-    """
-    
-    return {
-        "content": content.strip(),
-        "word_count": len(content.split()),
-        "confidence": 0.8
-    }
-
-if __name__ == "__main__":
-    print("🚀 Running My First OACP Agent")
-    print("=" * 50)
-    
-    # Generate content with OACP governance
-    result = write_content("Renewable Energy")
-    
-    print("✅ Content generated successfully!")
-    print(f"📝 Word count: {result['word_count']}")
-    print(f"🎯 Confidence: {result['confidence']}")
-    print("\n📄 Content Preview:")
-    print("-" * 30)
-    print(result["content"][:200] + "...")
-```
-
-### Run Your First Agent
-
-```bash
-python my_first_oacp.py
-```
-
-**Expected Output:**
-```
-🚀 Running My First OACP Agent
-==================================================
-✅ Content generated successfully!
-📝 Word count: 42
-🎯 Confidence: 0.8
-
-📄 Content Preview:
-------------------------------
-# Renewable Energy
-
-This is a comprehensive article about Renewable Energy.
-
-## Key Points
-- Important aspect 1
-- Important aspect 2
-- Important aspect 3...
-```
-
-## Adding Voters
-
-To see OACP's voting system in action, let's add some voter agents:
-
-### Create Voters
-
-Create `voters.py`:
-
-```python
-"""
-Voter agents for content review
-"""
-
-from oacp import vote, VoteDecision
-from oacp.context import get_current_context
-import time
-
-def quality_reviewer():
-    """A voter that reviews content quality."""
-    context = get_current_context()
-    run_id = context.run_id
-    
-    # Simulate review process
-    print("🔍 Quality Reviewer: Analyzing content...")
-    time.sleep(1)
-    
-    # Cast vote (in real scenario, this would be based on actual analysis)
-    vote(
-        run_id=run_id,
-        voter_id="quality_reviewer",
-        decision=VoteDecision.APPROVE,
-        reason="Content structure and flow are good"
-    )
-    print("✅ Quality Reviewer: APPROVED")
-
-def fact_checker():
-    """A voter that checks facts and accuracy."""
-    context = get_current_context()
-    run_id = context.run_id
-    
-    print("🔎 Fact Checker: Verifying information...")
-    time.sleep(1)
-    
-    vote(
-        run_id=run_id,
-        voter_id="fact_checker",
-        decision=VoteDecision.APPROVE,
-        reason="Information appears accurate and well-sourced"
-    )
-    print("✅ Fact Checker: APPROVED")
-
-def style_reviewer():
-    """A voter that reviews writing style."""
-    context = get_current_context()
-    run_id = context.run_id
-    
-    print("✍️ Style Reviewer: Checking writing style...")
-    time.sleep(1)
-    
-    # Sometimes reject for demonstration
-    import random
-    if random.random() > 0.7:  # 30% chance of rejection
-        vote(
-            run_id=run_id,
-            voter_id="style_reviewer",
-            decision=VoteDecision.REJECT,
-            reason="Writing style could be more engaging and specific"
-        )
-        print("❌ Style Reviewer: REJECTED")
-    else:
-        vote(
-            run_id=run_id,
-            voter_id="style_reviewer", 
-            decision=VoteDecision.APPROVE,
-            reason="Writing style is clear and appropriate"
-        )
-        print("✅ Style Reviewer: APPROVED")
-
-# Start voters in background
-if __name__ == "__main__":
-    import threading
-    
-    print("🗳️ Starting voter agents...")
-    
-    # Start voters in separate threads
-    threading.Thread(target=quality_reviewer, daemon=True).start()
-    threading.Thread(target=fact_checker, daemon=True).start()
-    threading.Thread(target=style_reviewer, daemon=True).start()
-    
-    print("✅ Voters are active and ready!")
-    
-    # Keep voters running
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        print("\n🛑 Voters stopped")
-```
-
-### Run with Voting
-
-1. **Start the voters** (in one terminal):
-   ```bash
-   python voters.py
-   ```
-
-2. **Run your agent** (in another terminal):
-   ```bash
-   python my_first_oacp.py
-   ```
-
-Now you'll see the voting process in action!
-
-## Multi-Agent Workflow
-
-Let's create a more complex workflow with multiple agents:
-
-### Research Team Example
-
-Create `research_team.py`:
-
-```python
-"""
-Multi-agent research team with OACP governance
-"""
-
-from oacp import with_oacp, DecisionContract, VotingStrategy
-import time
-
-@with_oacp(
-    role="researcher",
-    contract=DecisionContract(
-        voting_strategy=VotingStrategy.MAJORITY,
-        min_votes=2,
-        timeout_seconds=30
-    ),
-    adaptive_prompting=True
-)
-def research_topic(topic: str):
-    """Research a topic and gather information."""
-    print(f"🔍 Researching: {topic}")
-    time.sleep(2)  # Simulate research time
-    
-    return {
-        "topic": topic,
-        "findings": [
-            f"Key finding 1 about {topic}",
-            f"Key finding 2 about {topic}",
-            f"Key finding 3 about {topic}"
-        ],
-        "sources": ["Source A", "Source B", "Source C"],
-        "confidence": 0.85
-    }
-
-@with_oacp(
-    role="fact_checker",
-    contract=DecisionContract(
-        voting_strategy=VotingStrategy.UNANIMOUS,  # Higher standard for facts
-        min_votes=2,
-        timeout_seconds=45
-    )
-)
-def verify_facts(research_data):
-    """Verify the facts in research data."""
-    print(f"🔎 Fact-checking: {research_data['topic']}")
-    time.sleep(3)  # Simulate fact-checking time
-    
-    return {
-        "original_research": research_data,
-        "verified_facts": research_data["findings"],
-        "accuracy_score": 8.5,
-        "issues_found": [],
-        "status": "verified"
-    }
-
-@with_oacp(
-    role="synthesizer",
-    contract=DecisionContract(
-        voting_strategy=VotingStrategy.MAJORITY,
-        min_votes=3,
+    role="content_generator",
+    contract=decision_contract(
+        required_approvers=["quality_reviewer"],
+        strategy="majority",
         timeout_seconds=60
     )
 )
-def synthesize_report(verified_data):
-    """Create final report from verified research."""
-    print(f"📝 Synthesizing report: {verified_data['original_research']['topic']}")
-    time.sleep(2)
+def generate_content(topic: str) -> dict:
+    """Generate content that requires approval."""
+    content = f"This is content about {topic}"
+    return {"content": content, "topic": topic}
+
+# Step 2: Implement the reviewer
+def quality_reviewer(run_id: str, content_data: dict):
+    """Review content quality and vote."""
+    content = content_data["content"]
     
-    topic = verified_data['original_research']['topic']
-    findings = verified_data['verified_facts']
-    
-    report = f"""
-# Research Report: {topic}
+    if len(content) > 20 and "about" in content:
+        vote(
+            run_id=run_id,
+            voter_id="quality_reviewer",
+            decision=VoteDecision.APPROVE,
+            reason="Content meets quality standards"
+        )
+    else:
+        vote(
+            run_id=run_id,
+            voter_id="quality_reviewer", 
+            decision=VoteDecision.REJECT,
+            reason="Content too short or lacks detail"
+        )
 
-## Executive Summary
-This report presents verified research findings on {topic}.
+# Step 3: Use the governed function
+if __name__ == "__main__":
+    # This will trigger the governance process
+    result = generate_content("artificial intelligence")
+    print(result)
+```
 
-## Key Findings
-{chr(10).join(f"- {finding}" for finding in findings)}
+## Multi-Agent Workflow
 
-## Methodology
-Research was conducted using multiple sources and verified through 
-our fact-checking process (accuracy: {verified_data['accuracy_score']}/10).
+Here's a more complex example with multiple agents and voting:
 
-## Conclusion
-Based on our analysis, {topic} shows significant importance and 
-warrants further investigation.
-"""
-    
-    return {
-        "report": report.strip(),
-        "quality_score": 9.2,
-        "ready_for_publication": True
+```python
+from oacp import with_oacp, decision_contract, vote, VoteDecision
+import time
+import threading
+
+# Research Agent - No governance needed for data collection
+@with_oacp(role="researcher")
+def research_agent(topic: str) -> dict:
+    """Conduct research on the given topic."""
+    research_data = {
+        "topic": topic,
+        "findings": f"Research findings about {topic}",
+        "sources": ["source1.com", "source2.org"],
+        "confidence": 0.85
     }
+    return research_data
 
-def run_research_workflow(topic):
-    """Run the complete research workflow."""
-    print("🚀 Starting Research Team Workflow")
-    print("=" * 50)
+# Analysis Agent - Requires peer review
+@with_oacp(
+    role="analyst",
+    contract=decision_contract(
+        required_approvers=["peer_analyst", "senior_analyst"],
+        strategy="majority",
+        timeout_seconds=90
+    )
+)
+def analysis_agent(research_data: dict) -> dict:
+    """Analyze research data with peer review."""
+    analysis = {
+        "topic": research_data["topic"],
+        "analysis": f"Analysis of {research_data['topic']}",
+        "insights": ["insight1", "insight2", "insight3"],
+        "confidence": research_data["confidence"] * 0.9
+    }
+    return analysis
+
+# Synthesis Agent - Requires unanimous approval
+@with_oacp(
+    role="synthesizer",
+    contract=decision_contract(
+        required_approvers=["researcher", "analyst", "critic"],
+        strategy="unanimous",
+        timeout_seconds=120
+    )
+)
+def synthesis_agent(analysis_data: dict) -> dict:
+    """Synthesize final report requiring unanimous approval."""
+    final_report = {
+        "topic": analysis_data["topic"],
+        "final_report": f"Final synthesis on {analysis_data['topic']}",
+        "recommendations": ["rec1", "rec2"],
+        "confidence": analysis_data["confidence"]
+    }
+    return final_report
+
+# Voting Functions
+def peer_analyst_vote(run_id: str, analysis_data: dict):
+    """Peer analyst reviews the analysis."""
+    if analysis_data["confidence"] > 0.7:
+        vote(run_id, "peer_analyst", VoteDecision.APPROVE, 
+             "Analysis meets peer review standards")
+    else:
+        vote(run_id, "peer_analyst", VoteDecision.REJECT, 
+             "Analysis confidence too low")
+
+def senior_analyst_vote(run_id: str, analysis_data: dict):
+    """Senior analyst provides expert review."""
+    if len(analysis_data.get("insights", [])) >= 3:
+        vote(run_id, "senior_analyst", VoteDecision.APPROVE,
+             "Sufficient insights provided")
+    else:
+        vote(run_id, "senior_analyst", VoteDecision.REJECT,
+             "Need more comprehensive insights")
+
+def researcher_vote(run_id: str, synthesis_data: dict):
+    """Original researcher approves synthesis."""
+    vote(run_id, "researcher", VoteDecision.APPROVE,
+         "Synthesis accurately represents research")
+
+def analyst_vote(run_id: str, synthesis_data: dict):
+    """Analyst approves final synthesis."""
+    vote(run_id, "analyst", VoteDecision.APPROVE,
+         "Synthesis incorporates analysis correctly")
+
+def critic_vote(run_id: str, synthesis_data: dict):
+    """Critic provides final review."""
+    if synthesis_data["confidence"] > 0.6:
+        vote(run_id, "critic", VoteDecision.APPROVE,
+             "Final report meets publication standards")
+    else:
+        vote(run_id, "critic", VoteDecision.REJECT,
+             "Report needs improvement")
+
+# Run the workflow
+def run_research_workflow():
+    """Execute the complete research workflow."""
+    topic = "machine learning governance"
     
-    try:
-        # Step 1: Research
-        print("\n🔸 Step 1: Research Phase")
-        research_result = research_topic(topic)
-        print(f"✅ Research completed (confidence: {research_result['confidence']})")
-        
-        # Step 2: Fact-checking
-        print("\n🔸 Step 2: Fact-Checking Phase")
-        verified_result = verify_facts(research_result)
-        print(f"✅ Fact-check completed (accuracy: {verified_result['accuracy_score']}/10)")
-        
-        # Step 3: Synthesis
-        print("\n🔸 Step 3: Synthesis Phase")
-        final_report = synthesize_report(verified_result)
-        print(f"✅ Report synthesized (quality: {final_report['quality_score']}/10)")
-        
-        print("\n" + "=" * 50)
-        print("📊 WORKFLOW COMPLETED SUCCESSFULLY")
-        print("=" * 50)
-        print(f"✅ Ready for Publication: {final_report['ready_for_publication']}")
-        print(f"📈 Quality Score: {final_report['quality_score']}/10")
-        
-        print("\n📋 Final Report Preview:")
-        print("-" * 30)
-        print(final_report["report"][:300] + "...")
-        
-        return final_report
-        
-    except Exception as e:
-        print(f"❌ Workflow failed: {e}")
-        return None
+    print(f"Starting research workflow on: {topic}")
+    
+    # Step 1: Research (no governance)
+    print("Step 1: Conducting research...")
+    research_data = research_agent(topic)
+    print(f"Research completed: {research_data['confidence']:.2%} confidence")
+    
+    # Step 2: Analysis (majority voting)
+    print("Step 2: Analyzing data...")
+    
+    # Start voting threads for analysis
+    def vote_on_analysis(run_id):
+        time.sleep(1)  # Simulate review time
+        peer_analyst_vote(run_id, research_data)
+        senior_analyst_vote(run_id, research_data)
+    
+    # This will be populated by the @with_oacp decorator
+    analysis_run_id = None
+    
+    # Analysis will trigger voting automatically
+    analysis_data = analysis_agent(research_data)
+    print(f"Analysis completed and approved")
+    
+    # Step 3: Synthesis (unanimous voting)
+    print("Step 3: Creating synthesis...")
+    
+    # Synthesis will trigger voting automatically  
+    final_report = synthesis_agent(analysis_data)
+    print(f"Final report completed: {final_report['topic']}")
+    
+    return final_report
 
 if __name__ == "__main__":
-    # Run the research workflow
-    result = run_research_workflow("Artificial Intelligence in Healthcare")
+    try:
+        result = run_research_workflow()
+        print("\n=== WORKFLOW COMPLETED ===")
+        print(f"Final Result: {result}")
+    except Exception as e:
+        print(f"Workflow failed: {e}")
 ```
 
-### Run the Research Team
+## LangGraph Integration
 
-```bash
-python research_team.py
+OACP works seamlessly with LangGraph:
+
+```python
+from langgraph.graph import StateGraph
+from oacp import wrap_node, decision_contract
+from typing import TypedDict
+
+# Define state
+class WorkflowState(TypedDict):
+    topic: str
+    research: dict
+    analysis: dict
+    final_report: dict
+
+# Define nodes
+def research_node(state: WorkflowState) -> WorkflowState:
+    research_data = research_agent(state["topic"])
+    return {"research": research_data}
+
+def analysis_node(state: WorkflowState) -> WorkflowState:
+    analysis_data = analysis_agent(state["research"])
+    return {"analysis": analysis_data}
+
+def synthesis_node(state: WorkflowState) -> WorkflowState:
+    final_data = synthesis_agent(state["analysis"])
+    return {"final_report": final_data}
+
+# Create workflow with OACP governance
+def create_governed_workflow():
+    workflow = StateGraph(WorkflowState)
+    
+    # Add nodes with governance
+    workflow.add_node("research", wrap_node(
+        research_node,
+        role="researcher"
+    ))
+    
+    workflow.add_node("analysis", wrap_node(
+        analysis_node,
+        role="analyst",
+        contract=decision_contract(
+            required_approvers=["peer_analyst"],
+            strategy="majority"
+        )
+    ))
+    
+    workflow.add_node("synthesis", wrap_node(
+        synthesis_node,
+        role="synthesizer",
+        contract=decision_contract(
+            required_approvers=["researcher", "analyst"],
+            strategy="unanimous"
+        )
+    ))
+    
+    # Define edges
+    workflow.add_edge("research", "analysis")
+    workflow.add_edge("analysis", "synthesis")
+    
+    # Set entry point
+    workflow.set_entry_point("research")
+    
+    return workflow.compile()
+
+# Run the workflow
+def run_langgraph_workflow():
+    app = create_governed_workflow()
+    
+    initial_state = {"topic": "AI governance"}
+    final_state = app.invoke(initial_state)
+    
+    return final_state
+
+if __name__ == "__main__":
+    result = run_langgraph_workflow()
+    print(f"LangGraph workflow result: {result}")
 ```
 
-## Monitor with Web Dashboard
+## Configuration
 
-Start the web dashboard to monitor your workflows:
+### Environment Setup
+
+Create a `.env` file:
 
 ```bash
-# Start dashboard
-oacp serve
+# Storage configuration
+OACP_STORAGE_TYPE=file
+OACP_STORAGE_PATH=./oacp_data
 
-# Open in browser
-# http://localhost:8000
+# Logging
+OACP_LOG_LEVEL=INFO
+
+# Security
+OACP_REDACT_KEYS=password,secret,token
 ```
 
-The dashboard will show:
-- ✅ Real-time run monitoring
-- ✅ Voting patterns and consensus
-- ✅ Performance metrics
-- ✅ Event timelines
+### Programmatic Configuration
 
-## Project Template
+```python
+from oacp.storage import configure_storage
 
-For new projects, use the built-in project generator:
-
-```bash
-# Create new project
-oacp env init my-ai-project
-
-# Navigate to project
-cd my-ai-project
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Set up environment
-oacp env setup
-
-# Run the example
-python main.py
+# Configure storage backend
+configure_storage(
+    storage_type="sqlite",
+    storage_url="sqlite:///oacp.db"
+)
 ```
 
-## CLI Tools
+## CLI Usage
 
-OACP provides powerful CLI tools for monitoring and management:
+OACP includes a command-line interface:
 
 ```bash
-# List recent runs
-oacp list
+# View recent activity
+oacp logs --limit 10
 
-# Show run statistics
+# Show statistics
 oacp stats
 
-# Tail logs for a specific run
-oacp logs tail --run-id YOUR_RUN_ID
+# Monitor in real-time
+oacp monitor
 
-# Show configuration
-oacp config
-
-# Environment status
-oacp env status
+# Export data
+oacp export --format json --output audit.json
 ```
 
 ## Next Steps
 
-Now that you have OACP running, explore these advanced features:
+Now that you have OACP running:
 
-### 🎯 **Advanced Features**
-- [Voting Strategies](features/voting-strategies.md) - Custom voting logic
-- [Adaptive Prompting](features/adaptive-prompting.md) - Automatic improvement
-- [Storage Backends](api/storage-backends.md) - Database integration
+1. **Explore Examples**: Check out the `examples/` directory for more complex scenarios
+2. **Read the Docs**: Dive deeper into [features](features/) and [API reference](api/)
+3. **Configure Storage**: Set up [PostgreSQL](api/storage-backends.md) for production
+4. **Web Dashboard**: Enable the [web interface](web/dashboard.md) for monitoring
+5. **Advanced Features**: Learn about [adaptive prompting](features/adaptive-prompting.md)
 
-### 🛠️ **Integration Guides**
-- [LangGraph Integration](integrations/langgraph.md) - Deep workflow integration
-- [OpenAI Integration](integrations/openai.md) - GPT model integration
-- [Custom LLM Integration](integrations/custom-llm.md) - Your own models
+## Common Patterns
 
-### 📚 **Examples**
-- [Basic Usage](examples/basic-usage.md) - Simple implementations
-- [Research Team](examples/research-team.md) - Multi-agent collaboration
-- [Production Deployment](examples/production.md) - Production setup
+### Error Handling
 
-### 🌐 **Web Dashboard**
-- [Dashboard Guide](web/dashboard.md) - Complete monitoring
-- [REST API](web/api.md) - Programmatic access
-- [WebSocket Streaming](web/websockets.md) - Real-time updates
+```python
+from oacp import with_oacp
+from oacp.errors import OacpConsensusError, OacpTimeout
+
+@with_oacp(role="error_handler")
+def safe_operation(data: dict) -> dict:
+    try:
+        return {"result": "success"}
+    except OacpConsensusError as e:
+        print(f"Consensus failed: {e}")
+        return {"result": "consensus_failed", "error": str(e)}
+    except OacpTimeout as e:
+        print(f"Operation timed out: {e}")
+        return {"result": "timeout", "error": str(e)}
+```
+
+### Monitoring
+
+```python
+from oacp import current_context
+
+@with_oacp(role="monitored_agent")
+def monitored_function(data: dict) -> dict:
+    ctx = current_context()
+    print(f"Running as {ctx.role} in run {ctx.run_id}")
+    return {"processed": data}
+```
+
+### Conditional Governance
+
+```python
+def get_contract_for_data(data: dict):
+    if data.get("sensitive", False):
+        return decision_contract(
+            required_approvers=["security", "compliance"],
+            strategy="unanimous"
+        )
+    return None  # No governance for non-sensitive data
+
+@with_oacp(
+    role="conditional_processor",
+    contract=lambda data: get_contract_for_data(data)
+)
+def conditional_function(data: dict) -> dict:
+    return {"processed": data}
+```
 
 ## Troubleshooting
 
 ### Common Issues
 
-#### **Import Errors**
-```bash
-# Ensure OACP is installed
-pip install OACP
+1. **Timeout Errors**: Increase `timeout_seconds` in your contract
+2. **Missing Voters**: Ensure all required approvers are implemented
+3. **Import Errors**: Check that OACP is properly installed
+4. **Storage Issues**: Verify storage configuration
 
-# Check installation
-python -c "import oacp; print('OACP installed successfully')"
-```
+### Getting Help
 
-#### **No Votes Received**
-- Make sure voter agents are running
-- Check timeout settings in DecisionContract
-- Verify voters are casting votes with correct run_id
-
-#### **Storage Errors**
-```bash
-# Check storage configuration
-oacp config
-
-# Verify storage directory exists and is writable
-ls -la logs/
-
-# Reset configuration if needed
-oacp env setup --force
-```
-
-## Getting Help
-
-- **Documentation**: Browse all docs at `/docs/`
-- **Examples**: Check `/docs/examples/` for more use cases
-- **Issues**: Report bugs at GitHub Issues
-- **Discussions**: Ask questions in GitHub Discussions
-
-**Congratulations!** 🎉 You've successfully set up OACP and created your first governed multi-agent workflow. You're now ready to build more sophisticated AI systems with democratic governance and transparency.
+- Check the [FAQ](troubleshooting/faq.md)
+- Browse [GitHub Issues](https://github.com/Aaditya17032002/OACP/issues)
+- Read the full [documentation](overview.md)

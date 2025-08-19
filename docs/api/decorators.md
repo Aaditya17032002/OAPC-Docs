@@ -1,444 +1,584 @@
-# OACP Decorators API Reference
+# Decorators API Reference
 
-OACP decorators are the primary way to add governance to your functions and LangGraph nodes. This page provides comprehensive documentation for all available decorators and their parameters.
+OACP provides decorators to add governance and compliance features to your functions and LangGraph nodes.
 
-## @with_oacp Decorator
+## @with_oacp
 
-The main decorator that adds OACP governance to any Python function.
+The primary decorator for adding OACP governance to functions.
 
-### Basic Usage
-
-```python
-from oacp import with_oacp
-
-@with_oacp(role="agent_name")
-def my_agent_function(input_data):
-    # Your agent logic here
-    return result
-```
-
-### Full Signature
+### Signature
 
 ```python
-@with_oacp(
+def with_oacp(
     role: str,
-    contract: Optional[DecisionContract] = None,
-    adaptive_prompting: bool = False,
-    prompt_adapter: Optional[Callable] = None,
-    retry_policy: Optional[RetryPolicy] = None,
-    context_manager: Optional[ContextManager] = None,
-    trace_writer: Optional[TraceWriter] = None
-)
+    invariants: list[str] | None = None,
+    contract: DecisionContract | None = None,
+    log_inputs: bool = True,
+    log_outputs: bool = True,
+    retry_policy: RetryPolicy | None = None,
+    redact_keys: list[str] | None = None,
+    adaptive_prompting: bool = True,
+    prompt_adapter: Callable[[str, str, str, int, list[str]], str] | None = None,
+) -> Callable[[F], F]
 ```
 
 ### Parameters
 
-#### **role** (required)
-- **Type**: `str`
-- **Description**: Unique identifier for the agent/node
-- **Example**: `"researcher"`, `"fact_checker"`, `"synthesizer"`
+#### role: str
+**Required.** Unique identifier for the agent/node role.
 
 ```python
-@with_oacp(role="content_writer")
-def write_content(topic):
-    return f"Content about {topic}"
+@with_oacp(role="content_analyzer")
+def analyze_content(text: str) -> dict:
+    return {"analysis": "detailed_analysis"}
 ```
 
-#### **contract** (optional)
-- **Type**: `DecisionContract`
-- **Description**: Defines voting requirements and strategies
-- **Default**: No voting required
+#### invariants: list[str] | None = None
+**Optional.** List of invariants this node should maintain.
 
 ```python
-from oacp import DecisionContract, VotingStrategy
+@with_oacp(
+    role="data_processor",
+    invariants=["data_integrity", "privacy_compliance", "accuracy"]
+)
+def process_data(data: dict) -> dict:
+    return {"processed": data}
+```
+
+#### contract: DecisionContract | None = None
+**Optional.** Decision contract defining voting requirements.
+
+```python
+from oacp import decision_contract
 
 @with_oacp(
-    role="reviewer",
-    contract=DecisionContract(
-        voting_strategy=VotingStrategy.MAJORITY,
-        min_votes=3,
-        timeout_seconds=30,
-        required_voters=["expert1", "expert2"]
+    role="critical_processor",
+    contract=decision_contract(
+        required_approvers=["reviewer1", "reviewer2"],
+        strategy="unanimous",
+        timeout_seconds=120
     )
 )
-def review_content(content):
-    return {"approved": True, "feedback": "Good quality"}
+def process_critical_data(data: dict) -> dict:
+    return {"result": "processed"}
 ```
 
-#### **adaptive_prompting** (optional)
-- **Type**: `bool`
-- **Description**: Enable automatic prompt improvement
-- **Default**: `False`
+#### log_inputs: bool = True
+**Optional.** Whether to log function inputs.
 
 ```python
 @with_oacp(
-    role="researcher",
-    adaptive_prompting=True  # Enables learning from rejections
+    role="secure_processor",
+    log_inputs=False  # Don't log sensitive inputs
 )
-def research_with_adaptation(query):
-    # Prompts automatically improve based on feedback
-    return research_result
+def process_sensitive_data(sensitive_data: dict) -> dict:
+    return {"status": "processed"}
 ```
 
-#### **prompt_adapter** (optional)
-- **Type**: `Callable[[str, str, str, int, List[str]], str]`
-- **Description**: Custom prompt adaptation function
-- **Parameters**: `(original_prompt, role, node_id, attempt, rejection_reasons)`
+#### log_outputs: bool = True
+**Optional.** Whether to log function outputs.
 
 ```python
-def custom_adapter(original_prompt, role, node_id, attempt, rejection_reasons):
-    if "lacks detail" in " ".join(rejection_reasons):
-        return f"{original_prompt}\n\nPlease provide more detailed information."
-    return original_prompt
+@with_oacp(
+    role="output_generator",
+    log_outputs=False  # Don't log sensitive outputs
+)
+def generate_private_report(data: dict) -> dict:
+    return {"private_report": "confidential_data"}
+```
+
+#### retry_policy: RetryPolicy | None = None
+**Optional.** Retry policy for handling failures.
+
+```python
+from oacp.routing import RetryPolicy
 
 @with_oacp(
-    role="writer",
-    adaptive_prompting=True,
+    role="resilient_processor",
+    retry_policy=RetryPolicy(
+        max_attempts=3,
+        base_delay=1.0,
+        max_delay=10.0,
+        exponential_base=2.0
+    )
+)
+def unreliable_operation(data: dict) -> dict:
+    return {"result": "success"}
+```
+
+#### redact_keys: list[str] | None = None
+**Optional.** Keys to redact from logs (overrides global config).
+
+```python
+@with_oacp(
+    role="auth_processor",
+    redact_keys=["password", "token", "secret", "key"]
+)
+def process_auth_data(auth_data: dict) -> dict:
+    return {"authenticated": True}
+```
+
+#### adaptive_prompting: bool = True
+**Optional.** Enable adaptive prompting based on feedback.
+
+```python
+@with_oacp(
+    role="content_generator",
+    adaptive_prompting=True
+)
+def generate_content(prompt: str, context: dict) -> dict:
+    return {"content": "generated_content"}
+```
+
+#### prompt_adapter: Callable | None = None
+**Optional.** Custom prompt adaptation function.
+
+```python
+def custom_adapter(original_prompt, rejection_reason, voter_id, attempt_count, suggestions):
+    return f"{original_prompt}\n\nImproved based on: {rejection_reason}"
+
+@with_oacp(
+    role="adaptive_generator",
     prompt_adapter=custom_adapter
 )
-def write_with_custom_adaptation(topic):
-    return content
+def generate_with_custom_adaptation(prompt: str) -> dict:
+    return {"content": "adapted_content"}
 ```
 
-#### **retry_policy** (optional)
-- **Type**: `RetryPolicy`
-- **Description**: Configure retry behavior on consensus failure
+## wrap_node
+
+Convenience function for wrapping LangGraph nodes.
+
+### Signature
 
 ```python
-from oacp import RetryPolicy
-
-@with_oacp(
-    role="analyzer",
-    retry_policy=RetryPolicy(
-        max_attempts=5,
-        backoff_strategy="exponential",
-        initial_delay_ms=1000,
-        max_delay_ms=30000
-    )
-)
-def analyze_with_retries(data):
-    return analysis_result
+def wrap_node(func: Callable, **oacp_kwargs) -> Callable
 ```
 
-#### **context_manager** (optional)
-- **Type**: `ContextManager`
-- **Description**: Custom context management
+### Parameters
 
-#### **trace_writer** (optional)
-- **Type**: `TraceWriter`
-- **Description**: Custom trace writer for events
-
-## wrap_node Function
-
-Wraps LangGraph nodes with OACP governance.
+- **func**: Function to wrap
+- **oacp_kwargs**: Arguments to pass to @with_oacp
 
 ### Usage
 
 ```python
+from oacp import wrap_node
 from langgraph.graph import StateGraph
-from oacp import wrap_node, DecisionContract, VotingStrategy
 
-# Create your original node function
-def research_node(state):
-    # Your research logic
-    return {"research_result": "findings"}
+def my_agent_function(state: dict) -> dict:
+    return {"result": "processed"}
 
-# Wrap it with OACP
-governed_research = wrap_node(
-    research_node,
-    role="researcher",
-    contract=DecisionContract(
-        voting_strategy=VotingStrategy.UNANIMOUS,
-        min_votes=2
+# Wrap for use in LangGraph
+wrapped_function = wrap_node(
+    my_agent_function,
+    role="my_agent",
+    contract=decision_contract(
+        required_approvers=["reviewer"],
+        strategy="majority"
     )
 )
 
-# Use in LangGraph
-graph = StateGraph(state_schema)
-graph.add_node("research", governed_research)
+# Add to graph
+workflow = StateGraph(MyState)
+workflow.add_node("my_agent", wrapped_function)
 ```
 
-### Parameters
+## Advanced Usage Examples
 
-Same as `@with_oacp` decorator, plus:
-
-#### **node_func** (required)
-- **Type**: `Callable`
-- **Description**: The original LangGraph node function to wrap
-
-## DecisionContract Class
-
-Defines voting requirements and consensus rules.
-
-### Constructor
+### Multi-Stage Workflow
 
 ```python
-DecisionContract(
-    voting_strategy: VotingStrategy,
-    min_votes: int = 1,
-    timeout_seconds: int = 30,
-    required_voters: Optional[List[str]] = None,
-    voter_weights: Optional[Dict[str, float]] = None,
-    approval_threshold: float = 0.5,
-    metadata: Optional[Dict[str, Any]] = None
+from oacp import with_oacp, decision_contract
+from langgraph.graph import StateGraph
+
+# Stage 1: Data collection (no governance)
+@with_oacp(role="data_collector")
+def collect_data(query: str) -> dict:
+    return {"raw_data": "collected_data"}
+
+# Stage 2: Analysis (peer review)
+@with_oacp(
+    role="data_analyzer",
+    contract=decision_contract(
+        required_approvers=["peer_analyst"],
+        strategy="majority"
+    )
 )
-```
+def analyze_data(raw_data: dict) -> dict:
+    return {"analysis": "data_insights"}
 
-### Parameters
-
-#### **voting_strategy** (required)
-- **Type**: `VotingStrategy`
-- **Options**: `UNANIMOUS`, `MAJORITY`, `WEIGHTED`
-
-```python
-# All voters must approve
-VotingStrategy.UNANIMOUS
-
-# More than 50% must approve  
-VotingStrategy.MAJORITY
-
-# Weighted voting based on voter_weights
-VotingStrategy.WEIGHTED
-```
-
-#### **min_votes** (optional)
-- **Type**: `int`
-- **Default**: `1`
-- **Description**: Minimum number of votes required
-
-#### **timeout_seconds** (optional)
-- **Type**: `int`
-- **Default**: `30`
-- **Description**: How long to wait for votes
-
-#### **required_voters** (optional)
-- **Type**: `List[str]`
-- **Description**: Specific voters that must participate
-
-```python
-DecisionContract(
-    voting_strategy=VotingStrategy.MAJORITY,
-    required_voters=["expert", "reviewer", "validator"]
+# Stage 3: Report generation (unanimous approval)
+@with_oacp(
+    role="report_generator",
+    contract=decision_contract(
+        required_approvers=["analyst", "reviewer", "approver"],
+        strategy="unanimous",
+        timeout_seconds=300
+    ),
+    invariants=["accuracy", "completeness", "clarity"]
 )
+def generate_report(analysis: dict) -> dict:
+    return {"final_report": "comprehensive_report"}
+
+# Create workflow
+def create_workflow():
+    workflow = StateGraph(MyState)
+    workflow.add_node("collect", collect_data)
+    workflow.add_node("analyze", analyze_data)
+    workflow.add_node("report", generate_report)
+    
+    workflow.add_edge("collect", "analyze")
+    workflow.add_edge("analyze", "report")
+    
+    return workflow.compile()
 ```
 
-#### **voter_weights** (optional)
-- **Type**: `Dict[str, float]`
-- **Description**: Vote weights for weighted voting
+### Conditional Governance
 
 ```python
-DecisionContract(
-    voting_strategy=VotingStrategy.WEIGHTED,
-    voter_weights={
-        "senior_expert": 2.0,
-        "junior_reviewer": 1.0,
-        "validator": 1.5
-    }
+from oacp import with_oacp, current_context
+
+def get_contract_for_sensitivity(data: dict) -> DecisionContract | None:
+    """Return contract based on data sensitivity."""
+    sensitivity = data.get("sensitivity_level", "low")
+    
+    if sensitivity == "high":
+        return decision_contract(
+            required_approvers=["security", "compliance", "legal"],
+            strategy="unanimous",
+            timeout_seconds=600
+        )
+    elif sensitivity == "medium":
+        return decision_contract(
+            required_approvers=["security", "compliance"],
+            strategy="majority",
+            timeout_seconds=300
+        )
+    else:
+        return None  # No governance for low sensitivity
+
+@with_oacp(
+    role="data_processor",
+    contract=lambda data: get_contract_for_sensitivity(data)
 )
+def process_sensitive_data(data: dict) -> dict:
+    return {"processed": data, "status": "completed"}
 ```
 
-#### **approval_threshold** (optional)
-- **Type**: `float`
-- **Default**: `0.5`
-- **Description**: Threshold for approval (0.0 to 1.0)
-
-## RetryPolicy Class
-
-Configures retry behavior when consensus fails.
-
-### Constructor
+### Async Function Support
 
 ```python
-RetryPolicy(
-    max_attempts: int = 3,
-    backoff_strategy: str = "exponential",
-    initial_delay_ms: int = 1000,
-    max_delay_ms: int = 30000,
-    jitter: bool = True
+import asyncio
+from oacp import with_oacp
+
+@with_oacp(
+    role="async_processor",
+    contract=decision_contract(
+        required_approvers=["async_reviewer"],
+        strategy="majority"
+    )
 )
+async def async_processing_function(data: dict) -> dict:
+    """Async function with OACP governance."""
+    await asyncio.sleep(1)  # Simulate async work
+    return {"async_result": "processed"}
+
+# Usage
+async def main():
+    result = await async_processing_function({"input": "data"})
+    print(result)
 ```
 
-### Backoff Strategies
-
-- **`"linear"`**: Fixed delay between retries
-- **`"exponential"`**: Exponentially increasing delays
-- **`"constant"`**: Same delay for all retries
-
-## Error Handling
-
-OACP decorators can raise several types of errors:
-
-### OacpConsensusError
-Raised when consensus cannot be achieved within the specified parameters.
+### Error Handling and Retry
 
 ```python
+from oacp import with_oacp
+from oacp.routing import RetryPolicy
 from oacp.errors import OacpConsensusError
 
-try:
-    result = governed_function(input_data)
-except OacpConsensusError as e:
-    print(f"Consensus failed: {e.message}")
-    print(f"Run ID: {e.run_id}")
-    print(f"Node ID: {e.node_id}")
+@with_oacp(
+    role="resilient_processor",
+    contract=decision_contract(
+        required_approvers=["validator"],
+        strategy="majority"
+    ),
+    retry_policy=RetryPolicy(
+        max_attempts=5,
+        base_delay=2.0,
+        max_delay=30.0,
+        exponential_base=2.0
+    )
+)
+def resilient_function(data: dict) -> dict:
+    """Function with comprehensive error handling."""
+    try:
+        # Process data
+        result = complex_processing(data)
+        return {"result": result, "status": "success"}
+    except Exception as e:
+        # Log error for debugging
+        logger.error(f"Processing failed: {e}")
+        raise
 ```
 
-### OacpTimeoutError
-Raised when voting times out.
+### Custom Context Access
 
-### OacpStorageError
-Raised when there are storage-related issues.
+```python
+from oacp import with_oacp, current_context
+
+@with_oacp(role="context_aware_processor")
+def context_aware_function(data: dict) -> dict:
+    """Function that uses OACP context."""
+    ctx = current_context()
+    
+    # Access context information
+    run_id = ctx.run_id
+    node_id = ctx.node_id
+    role = ctx.role
+    
+    # Use context in processing
+    result = {
+        "processed_data": data,
+        "run_id": run_id,
+        "processed_by": role,
+        "metadata": ctx.metadata
+    }
+    
+    return result
+```
+
+## Integration Patterns
+
+### With FastAPI
+
+```python
+from fastapi import FastAPI
+from oacp import with_oacp, decision_contract
+
+app = FastAPI()
+
+@app.post("/process")
+@with_oacp(
+    role="api_processor",
+    contract=decision_contract(
+        required_approvers=["api_validator"],
+        strategy="majority"
+    )
+)
+def process_api_request(data: dict) -> dict:
+    return {"api_result": "processed", "data": data}
+```
+
+### With Celery
+
+```python
+from celery import Celery
+from oacp import with_oacp
+
+app = Celery('oacp_tasks')
+
+@app.task
+@with_oacp(
+    role="background_processor",
+    contract=decision_contract(
+        required_approvers=["task_validator"],
+        strategy="majority"
+    )
+)
+def background_task(data: dict) -> dict:
+    return {"task_result": "completed", "data": data}
+```
+
+### With Class Methods
+
+```python
+from oacp import with_oacp
+
+class DataProcessor:
+    @with_oacp(
+        role="class_processor",
+        contract=decision_contract(
+            required_approvers=["method_validator"],
+            strategy="majority"
+        )
+    )
+    def process(self, data: dict) -> dict:
+        """Class method with OACP governance."""
+        return {"processed": data, "processor": self.__class__.__name__}
+    
+    @staticmethod
+    @with_oacp(role="static_processor")
+    def static_process(data: dict) -> dict:
+        """Static method with OACP governance."""
+        return {"static_result": data}
+    
+    @classmethod
+    @with_oacp(role="class_method_processor")
+    def class_process(cls, data: dict) -> dict:
+        """Class method with OACP governance."""
+        return {"class_result": data, "class": cls.__name__}
+```
 
 ## Best Practices
 
-### 1. **Choose Appropriate Voting Strategies**
+### Role Naming
 
 ```python
-# For critical decisions requiring full agreement
+# Good: Descriptive, specific roles
+@with_oacp(role="user_data_validator")
+@with_oacp(role="financial_report_generator")
+@with_oacp(role="security_compliance_checker")
+
+# Avoid: Generic, unclear roles
+@with_oacp(role="processor")  # Too generic
+@with_oacp(role="agent1")     # Not descriptive
+```
+
+### Contract Design
+
+```python
+# Good: Appropriate contracts for use case
 @with_oacp(
-    role="critical_analyzer",
-    contract=DecisionContract(
-        voting_strategy=VotingStrategy.UNANIMOUS,
-        min_votes=3
+    role="critical_decision_maker",
+    contract=decision_contract(
+        required_approvers=["domain_expert", "security_officer"],
+        strategy="unanimous",  # Critical decisions need full consensus
+        timeout_seconds=300    # Allow time for thorough review
     )
 )
 
-# For general quality control
+# Good: Simple majority for routine tasks
 @with_oacp(
     role="content_reviewer",
-    contract=DecisionContract(
-        voting_strategy=VotingStrategy.MAJORITY,
-        min_votes=5
+    contract=decision_contract(
+        required_approvers=["reviewer1", "reviewer2", "reviewer3"],
+        strategy="majority",   # Faster decisions for routine work
+        timeout_seconds=60     # Reasonable timeout
     )
 )
+```
 
-# For expert-weighted decisions
+### Logging Configuration
+
+```python
+# Good: Selective logging based on sensitivity
 @with_oacp(
-    role="technical_reviewer",
-    contract=DecisionContract(
-        voting_strategy=VotingStrategy.WEIGHTED,
-        voter_weights={"senior": 2.0, "junior": 1.0}
-    )
+    role="payment_processor",
+    log_inputs=False,      # Don't log sensitive payment data
+    log_outputs=True,      # Log processing results
+    redact_keys=["card_number", "cvv", "account_number"]
 )
-```
 
-### 2. **Use Adaptive Prompting Strategically**
-
-```python
-# Enable for agents that can benefit from feedback
+# Good: Full logging for debugging
 @with_oacp(
-    role="content_generator",
-    adaptive_prompting=True,  # Learns from rejections
-    contract=DecisionContract(
-        voting_strategy=VotingStrategy.MAJORITY,
-        min_votes=3
-    )
+    role="debug_processor",
+    log_inputs=True,       # Log everything for debugging
+    log_outputs=True,
+    invariants=["debug_mode"]
 )
 ```
 
-### 3. **Configure Reasonable Timeouts**
+## Common Patterns
+
+### Validation Chain
 
 ```python
-# Short timeout for simple decisions
-DecisionContract(timeout_seconds=10)
+# Chain of validation with increasing strictness
+@with_oacp(role="basic_validator")
+def basic_validation(data: dict) -> dict:
+    return {"validated": data, "level": "basic"}
 
-# Longer timeout for complex analysis
-DecisionContract(timeout_seconds=120)
+@with_oacp(
+    role="advanced_validator",
+    contract=decision_contract(
+        required_approvers=["senior_validator"],
+        strategy="majority"
+    )
+)
+def advanced_validation(data: dict) -> dict:
+    return {"validated": data, "level": "advanced"}
+
+@with_oacp(
+    role="expert_validator",
+    contract=decision_contract(
+        required_approvers=["expert1", "expert2", "expert3"],
+        strategy="unanimous"
+    )
+)
+def expert_validation(data: dict) -> dict:
+    return {"validated": data, "level": "expert"}
 ```
 
-### 4. **Handle Errors Gracefully**
+### Fallback Processing
 
 ```python
-from oacp.errors import OacpConsensusError, OacpTimeoutError
+from oacp.routing import RetryPolicy
 
-@with_oacp(role="resilient_agent")
-def resilient_function(data):
+@with_oacp(
+    role="primary_processor",
+    retry_policy=RetryPolicy(max_attempts=1)  # Single attempt
+)
+def primary_processing(data: dict) -> dict:
+    if can_process_primary(data):
+        return {"result": "primary_processed"}
+    else:
+        raise ValueError("Primary processing failed")
+
+@with_oacp(role="fallback_processor")
+def fallback_processing(data: dict) -> dict:
+    return {"result": "fallback_processed", "note": "Used fallback"}
+
+def robust_processing(data: dict) -> dict:
     try:
-        return process_data(data)
-    except (OacpConsensusError, OacpTimeoutError):
-        # Fallback logic
+        return primary_processing(data)
+    except Exception:
         return fallback_processing(data)
 ```
 
-## Advanced Usage
+## Troubleshooting
 
-### Custom Prompt Adaptation
+### Common Issues
 
+#### Decorator Order
 ```python
-def domain_specific_adapter(original_prompt, role, node_id, attempt, rejection_reasons):
-    """Custom adapter for domain-specific improvements."""
-    
-    # Analyze rejection patterns
-    issues = []
-    if any("technical accuracy" in reason for reason in rejection_reasons):
-        issues.append("Include more technical details and citations")
-    
-    if any("clarity" in reason for reason in rejection_reasons):
-        issues.append("Use clearer, more accessible language")
-    
-    if issues:
-        improvements = "\n".join(f"- {issue}" for issue in issues)
-        return f"{original_prompt}\n\nIMPORTANT IMPROVEMENTS:\n{improvements}"
-    
-    return original_prompt
+# Correct: OACP decorator should be outermost
+@with_oacp(role="my_processor")
+@some_other_decorator
+def my_function(data: dict) -> dict:
+    return data
 
-@with_oacp(
-    role="technical_writer",
-    adaptive_prompting=True,
-    prompt_adapter=domain_specific_adapter
-)
-def write_technical_content(topic):
-    return generate_content(topic)
+# Incorrect: Other decorators outside OACP
+@some_other_decorator
+@with_oacp(role="my_processor")  # May not work correctly
+def my_function(data: dict) -> dict:
+    return data
 ```
 
-### Integration with LangGraph
-
+#### Context Issues
 ```python
-from langgraph.graph import StateGraph
-from oacp import wrap_node, DecisionContract, VotingStrategy
+# Correct: Access context within decorated function
+@with_oacp(role="context_user")
+def function_with_context(data: dict) -> dict:
+    ctx = current_context()  # Works inside decorated function
+    return {"context_id": ctx.run_id}
 
-def create_governed_workflow():
-    # Define state schema
-    class WorkflowState(TypedDict):
-        input: str
-        research: str
-        analysis: str
-        output: str
-    
-    # Create graph
-    graph = StateGraph(WorkflowState)
-    
-    # Add governed nodes
-    graph.add_node("research", wrap_node(
-        research_node,
-        role="researcher",
-        contract=DecisionContract(
-            voting_strategy=VotingStrategy.MAJORITY,
-            min_votes=2
-        ),
-        adaptive_prompting=True
-    ))
-    
-    graph.add_node("analysis", wrap_node(
-        analysis_node,
-        role="analyzer",
-        contract=DecisionContract(
-            voting_strategy=VotingStrategy.UNANIMOUS,
-            min_votes=3
-        )
-    ))
-    
-    # Add edges
-    graph.add_edge("research", "analysis")
-    graph.set_entry_point("research")
-    graph.set_finish_point("analysis")
-    
-    return graph.compile()
+# Incorrect: Access context outside decorated function
+def function_without_context(data: dict) -> dict:
+    ctx = current_context()  # RuntimeError: No context available
+    return {"context_id": ctx.run_id}
 ```
 
-## Related Documentation
+#### Async/Sync Mismatch
+```python
+# Correct: Async decorator with async function
+@with_oacp(role="async_processor")
+async def async_function(data: dict) -> dict:
+    await some_async_operation()
+    return {"result": "async"}
 
-- [Decision Contracts](contracts.md) - Detailed contract configuration
-- [Voting Strategies](../features/voting-strategies.md) - Voting system overview
-- [Adaptive Prompting](../features/adaptive-prompting.md) - How adaptation works
-- [Examples](../examples/basic-usage.md) - Practical examples
-- [Error Handling](../features/error-handling.md) - Error management strategies
+# Correct: Sync decorator with sync function
+@with_oacp(role="sync_processor")
+def sync_function(data: dict) -> dict:
+    return {"result": "sync"}
+```

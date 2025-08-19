@@ -1,494 +1,449 @@
-# Voting Strategies in OACP
+# Voting Strategies
 
-OACP supports multiple voting strategies to handle different types of decisions and consensus requirements. Each strategy has its own use cases, advantages, and configuration options.
+OACP supports multiple voting strategies to accommodate different decision-making requirements. Each strategy has its own characteristics and use cases.
 
 ## Overview
 
-Voting strategies determine how OACP evaluates votes to reach consensus. The choice of strategy depends on your specific requirements for:
+Voting strategies determine how consensus is reached among agents:
 
-- **Decision criticality** - How important is unanimous agreement?
-- **Voter expertise** - Should some voters have more influence?
-- **Speed vs. accuracy** - How quickly do you need decisions?
-- **Team dynamics** - How many voters are typically available?
+- **Unanimous**: All voters must approve
+- **Majority**: More than 50% must approve  
+- **Weighted**: Votes have different importance levels
 
-## Available Strategies
+## Unanimous Voting
 
-### 1. Unanimous Voting
+### Description
 
-**All voters must approve for consensus to be reached.**
+All required approvers must vote APPROVE for consensus to be achieved. A single REJECT or ABSTAIN vote blocks consensus.
+
+### Configuration
 
 ```python
-from oacp import DecisionContract, VotingStrategy
+from oacp import decision_contract
 
-contract = DecisionContract(
-    voting_strategy=VotingStrategy.UNANIMOUS,
-    min_votes=3,
-    timeout_seconds=30
+contract = decision_contract(
+    required_approvers=["agent1", "agent2", "agent3"],
+    strategy="unanimous",
+    timeout_seconds=120
 )
 ```
 
-#### When to Use
-- **Critical decisions** where errors are costly
-- **Safety-critical systems** requiring full agreement  
-- **High-stakes content** like legal or medical advice
-- **Final approval stages** in multi-stage workflows
+### Use Cases
 
-#### Advantages
-- ✅ Maximum quality assurance
-- ✅ All perspectives considered
-- ✅ High confidence in decisions
-- ✅ Clear accountability
+- **Critical Decisions**: High-stakes outputs requiring complete agreement
+- **Compliance Requirements**: Regulatory or legal decisions
+- **Quality Assurance**: When zero tolerance for errors is needed
+- **Security Reviews**: Security-sensitive operations
 
-#### Disadvantages
-- ❌ Can be slow if voters disagree
-- ❌ Single dissenter can block progress
-- ❌ May discourage innovation
-- ❌ Requires all voters to be available
-
-#### Example Use Cases
+### Example
 
 ```python
-# Critical safety review
+from oacp import with_oacp, decision_contract, vote, VoteDecision
+
 @with_oacp(
-    role="safety_reviewer",
-    contract=DecisionContract(
-        voting_strategy=VotingStrategy.UNANIMOUS,
-        min_votes=3,
-        required_voters=["safety_expert", "engineer", "manager"]
+    role="security_processor",
+    contract=decision_contract(
+        required_approvers=["security_agent", "compliance_agent", "legal_agent"],
+        strategy="unanimous"
     )
 )
-def review_safety_protocol(protocol):
-    return safety_analysis(protocol)
+def process_sensitive_data(data: dict) -> dict:
+    return {"processed": data, "security_level": "high"}
 
-# Final content approval
-@with_oacp(
-    role="final_approver", 
-    contract=DecisionContract(
-        voting_strategy=VotingStrategy.UNANIMOUS,
-        min_votes=2,
-        required_voters=["editor", "legal_reviewer"]
-    )
-)
-def approve_publication(content):
-    return final_review(content)
+# All agents must approve
+def security_agent_vote(run_id: str, data: dict):
+    if security_check(data):
+        vote(run_id, "security_agent", VoteDecision.APPROVE, "Security validated")
+    else:
+        vote(run_id, "security_agent", VoteDecision.REJECT, "Security risks found")
+
+def compliance_agent_vote(run_id: str, data: dict):
+    if compliance_check(data):
+        vote(run_id, "compliance_agent", VoteDecision.APPROVE, "Compliance verified")
+    else:
+        vote(run_id, "compliance_agent", VoteDecision.REJECT, "Compliance issues")
+
+def legal_agent_vote(run_id: str, data: dict):
+    if legal_check(data):
+        vote(run_id, "legal_agent", VoteDecision.APPROVE, "Legal requirements met")
+    else:
+        vote(run_id, "legal_agent", VoteDecision.REJECT, "Legal concerns identified")
 ```
 
-### 2. Majority Voting
+### Advantages
 
-**More than 50% of voters must approve for consensus.**
+- **Highest Confidence**: Complete agreement ensures high-quality decisions
+- **Risk Minimization**: Single dissenter can prevent bad decisions
+- **Comprehensive Review**: All perspectives must be satisfied
 
-```python
-contract = DecisionContract(
-    voting_strategy=VotingStrategy.MAJORITY,
-    min_votes=3,
-    approval_threshold=0.6  # 60% approval required
-)
-```
+### Disadvantages
 
-#### When to Use
-- **General quality control** in content workflows
-- **Balanced decision-making** with multiple perspectives
-- **Moderate-risk decisions** where speed matters
-- **Democratic processes** with equal voter weight
+- **Slow Process**: Can be time-consuming to achieve full consensus
+- **Blocking Risk**: One unavailable or disagreeing agent blocks progress
+- **Conservative Bias**: May lead to overly cautious decisions
 
-#### Advantages
-- ✅ Faster than unanimous voting
-- ✅ Resilient to single dissenter
-- ✅ Democratic and fair
-- ✅ Good balance of speed and quality
+## Majority Voting
 
-#### Disadvantages
-- ❌ Minority opinions may be ignored
-- ❌ Less thorough than unanimous
-- ❌ Requires odd number of voters for clear majority
-- ❌ May not catch edge cases
+### Description
 
-#### Configuration Options
+More than 50% of required approvers must vote APPROVE. Abstentions are not counted toward the total.
+
+### Configuration
 
 ```python
-# Standard majority (>50%)
-DecisionContract(
-    voting_strategy=VotingStrategy.MAJORITY,
-    min_votes=5,
-    approval_threshold=0.5
-)
-
-# Supermajority (>66%)
-DecisionContract(
-    voting_strategy=VotingStrategy.MAJORITY,
-    min_votes=5,
-    approval_threshold=0.66
-)
-
-# Simple majority with minimum voters
-DecisionContract(
-    voting_strategy=VotingStrategy.MAJORITY,
-    min_votes=3,
-    required_voters=["reviewer1", "reviewer2", "reviewer3", "reviewer4", "reviewer5"]
+contract = decision_contract(
+    required_approvers=["agent1", "agent2", "agent3", "agent4", "agent5"],
+    strategy="majority",
+    timeout_seconds=60
 )
 ```
 
-#### Example Use Cases
+### Use Cases
+
+- **Balanced Decisions**: When perfect consensus isn't critical
+- **Time-Sensitive Operations**: Faster decision-making needed
+- **Democratic Processes**: Equal voice for all participants
+- **Content Review**: Multiple reviewers with differing opinions
+
+### Example
 
 ```python
-# Content quality review
 @with_oacp(
     role="content_reviewer",
-    contract=DecisionContract(
-        voting_strategy=VotingStrategy.MAJORITY,
-        min_votes=5,
-        approval_threshold=0.6
+    contract=decision_contract(
+        required_approvers=["reviewer1", "reviewer2", "reviewer3", "reviewer4", "reviewer5"],
+        strategy="majority"
     )
 )
-def review_article(article):
-    return quality_check(article)
+def review_content(content: dict) -> dict:
+    return {"reviewed": content, "status": "approved"}
 
-# Research validation
+# 3 out of 5 approvals needed (majority)
+def reviewer_vote(run_id: str, reviewer_id: str, content: dict):
+    score = evaluate_content(content)
+    
+    if score >= 7.0:
+        vote(run_id, reviewer_id, VoteDecision.APPROVE, f"Quality score: {score}")
+    elif score >= 5.0:
+        vote(run_id, reviewer_id, VoteDecision.ABSTAIN, f"Neutral score: {score}")
+    else:
+        vote(run_id, reviewer_id, VoteDecision.REJECT, f"Low quality: {score}")
+```
+
+### Advantages
+
+- **Faster Decisions**: Doesn't require full consensus
+- **Resilient to Outliers**: Single dissenter doesn't block progress
+- **Democratic**: Equal weight for all voters
+- **Practical**: Good balance of speed and thoroughness
+
+### Disadvantages
+
+- **May Ignore Minorities**: Valid concerns from minority can be overruled
+- **Less Thorough**: May not catch all issues
+- **Polarization Risk**: Can create winner/loser dynamics
+
+## Weighted Voting
+
+### Description
+
+Votes have different importance levels based on agent expertise, role, or other factors. Consensus requires weighted approval exceeding 50% of total weight.
+
+### Configuration
+
+```python
+contract = decision_contract(
+    required_approvers=["senior_expert", "expert", "junior1", "junior2"],
+    strategy="weighted",
+    weights={
+        "senior_expert": 0.4,
+        "expert": 0.3,
+        "junior1": 0.15,
+        "junior2": 0.15
+    }
+)
+```
+
+### Use Cases
+
+- **Hierarchical Organizations**: Different authority levels
+- **Expertise-Based Decisions**: Subject matter experts have more influence
+- **Quality Control**: Senior reviewers have more weight
+- **Resource Allocation**: Stakeholders have proportional influence
+
+### Example
+
+```python
 @with_oacp(
     role="research_validator",
-    contract=DecisionContract(
-        voting_strategy=VotingStrategy.MAJORITY,
-        min_votes=3,
-        required_voters=["expert1", "expert2", "expert3", "expert4"]
+    contract=decision_contract(
+        required_approvers=["senior_researcher", "researcher", "assistant1", "assistant2"],
+        strategy="weighted",
+        weights={
+            "senior_researcher": 0.5,    # 50% weight
+            "researcher": 0.3,           # 30% weight  
+            "assistant1": 0.1,           # 10% weight
+            "assistant2": 0.1            # 10% weight
+        }
     )
 )
-def validate_research(findings):
-    return research_review(findings)
+def validate_research(research: dict) -> dict:
+    return {"validated": research, "confidence": "high"}
+
+# Different voting weights based on expertise
+def senior_researcher_vote(run_id: str, research: dict):
+    # Senior vote carries 50% weight
+    if thorough_review(research):
+        vote(run_id, "senior_researcher", VoteDecision.APPROVE, 
+             "Comprehensive review passed")
+
+def researcher_vote(run_id: str, research: dict):
+    # Regular researcher vote carries 30% weight
+    if peer_review(research):
+        vote(run_id, "researcher", VoteDecision.APPROVE, 
+             "Peer review approved")
+
+def assistant_vote(run_id: str, assistant_id: str, research: dict):
+    # Assistant votes carry 10% weight each
+    if basic_check(research):
+        vote(run_id, assistant_id, VoteDecision.APPROVE, 
+             "Basic validation passed")
 ```
 
-### 3. Weighted Voting
+### Advantages
 
-**Votes are weighted based on voter expertise or authority.**
+- **Expertise Recognition**: More qualified agents have greater influence
+- **Efficient**: Can reach decisions with key expert approval
+- **Flexible**: Weights can be adjusted based on context
+- **Quality Focus**: Emphasizes expert judgment
 
-```python
-contract = DecisionContract(
-    voting_strategy=VotingStrategy.WEIGHTED,
-    min_votes=3,
-    voter_weights={
-        "senior_expert": 2.0,
-        "expert": 1.5,
-        "reviewer": 1.0,
-        "trainee": 0.5
-    },
-    approval_threshold=0.6  # 60% of weighted votes
-)
-```
+### Disadvantages
 
-#### When to Use
-- **Expert-driven decisions** where experience matters
-- **Hierarchical organizations** with different authority levels
-- **Technical reviews** requiring specialized knowledge
-- **Quality assurance** with varying reviewer expertise
+- **Power Imbalance**: Can discourage participation from lower-weighted agents
+- **Weight Calibration**: Requires careful tuning of weights
+- **Complexity**: More complex to understand and implement
+- **Bias Risk**: May perpetuate existing hierarchies
 
-#### Advantages
-- ✅ Leverages expertise appropriately
-- ✅ Reflects real-world authority structures
-- ✅ Can be faster than equal-weight voting
-- ✅ Accounts for voter competency
+## Custom Voting Strategies
 
-#### Disadvantages
-- ❌ May marginalize junior voices
-- ❌ Requires careful weight calibration
-- ❌ Can create bias toward senior opinions
-- ❌ Complex to configure initially
-
-#### Weight Configuration Strategies
+### Implementing Custom Strategies
 
 ```python
-# Experience-based weights
-voter_weights = {
-    "10_year_expert": 3.0,
-    "5_year_expert": 2.0,
-    "2_year_expert": 1.5,
-    "junior": 1.0,
-    "trainee": 0.5
-}
+from oacp.contracts import VotingStrategy
+from oacp.events import VoteDecision
 
-# Role-based weights
-voter_weights = {
-    "domain_expert": 2.5,
-    "technical_lead": 2.0,
-    "senior_developer": 1.5,
-    "developer": 1.0,
-    "intern": 0.5
-}
-
-# Certification-based weights
-voter_weights = {
-    "certified_expert": 2.0,
-    "experienced_reviewer": 1.5,
-    "standard_reviewer": 1.0
-}
-```
-
-#### Example Use Cases
-
-```python
-# Technical architecture review
-@with_oacp(
-    role="architecture_reviewer",
-    contract=DecisionContract(
-        voting_strategy=VotingStrategy.WEIGHTED,
-        voter_weights={
-            "principal_architect": 3.0,
-            "senior_architect": 2.0,
-            "architect": 1.5,
-            "senior_engineer": 1.0
-        },
-        approval_threshold=0.7
-    )
-)
-def review_architecture(design):
-    return architecture_analysis(design)
-
-# Medical diagnosis validation
-@with_oacp(
-    role="diagnosis_validator",
-    contract=DecisionContract(
-        voting_strategy=VotingStrategy.WEIGHTED,
-        voter_weights={
-            "specialist": 3.0,
-            "attending_physician": 2.0,
-            "resident": 1.0
-        },
-        min_votes=3
-    )
-)
-def validate_diagnosis(symptoms, tests):
-    return medical_analysis(symptoms, tests)
-```
-
-## Advanced Configuration
-
-### Dynamic Voter Weights
-
-You can implement dynamic weight calculation based on context:
-
-```python
-def calculate_dynamic_weights(context, voters):
-    """Calculate weights based on voter expertise in specific domain."""
-    weights = {}
-    domain = context.get("domain", "general")
-    
-    for voter in voters:
-        base_weight = 1.0
+class CustomVotingStrategy:
+    @staticmethod
+    def evaluate_custom(
+        votes: dict[str, VoteDecision],
+        required_approvers: list[str],
+        weights: dict[str, float] | None = None,
+        **kwargs
+    ) -> tuple[bool, str]:
+        """Custom voting logic implementation."""
         
-        # Adjust based on domain expertise
-        if voter.expertise.get(domain, 0) > 5:
-            base_weight *= 2.0
-        elif voter.expertise.get(domain, 0) > 2:
-            base_weight *= 1.5
+        # Example: Require at least 2 approvals and no rejections
+        approvals = sum(1 for v in votes.values() if v == VoteDecision.APPROVE)
+        rejections = sum(1 for v in votes.values() if v == VoteDecision.REJECT)
         
-        # Adjust based on recent performance
-        if voter.recent_accuracy > 0.9:
-            base_weight *= 1.2
-        elif voter.recent_accuracy < 0.7:
-            base_weight *= 0.8
+        if rejections > 0:
+            return False, f"Rejections not allowed: {rejections} found"
         
-        weights[voter.id] = base_weight
-    
-    return weights
-
-# Use in contract
-contract = DecisionContract(
-    voting_strategy=VotingStrategy.WEIGHTED,
-    voter_weights=calculate_dynamic_weights(context, available_voters)
-)
-```
-
-### Hybrid Strategies
-
-Combine multiple strategies for complex scenarios:
-
-```python
-def hybrid_voting_strategy(votes, contract, context):
-    """Custom hybrid strategy combining unanimous and majority."""
-    
-    # First, try unanimous among senior voters
-    senior_votes = [v for v in votes if v.voter_weight >= 2.0]
-    if len(senior_votes) >= 2 and all(v.decision == VoteDecision.APPROVE for v in senior_votes):
-        return True
-    
-    # Fallback to majority among all voters
-    approvals = sum(1 for v in votes if v.decision == VoteDecision.APPROVE)
-    return approvals > len(votes) / 2
+        if approvals >= 2:
+            return True, f"Minimum approvals met: {approvals}"
+        
+        return False, f"Insufficient approvals: {approvals} (need 2+)"
 
 # Register custom strategy
-register_voting_strategy("hybrid", hybrid_voting_strategy)
+VotingStrategy.register("custom", CustomVotingStrategy.evaluate_custom)
+
+# Use custom strategy
+contract = decision_contract(
+    required_approvers=["agent1", "agent2", "agent3"],
+    strategy="custom"
+)
 ```
 
-### Conditional Voting
-
-Implement voting requirements that change based on context:
+### Advanced Custom Strategy
 
 ```python
-def create_conditional_contract(risk_level, content_type):
-    """Create contract based on risk assessment."""
-    
-    if risk_level == "high" or content_type == "legal":
-        return DecisionContract(
-            voting_strategy=VotingStrategy.UNANIMOUS,
-            min_votes=3,
-            required_voters=["expert", "legal", "manager"]
-        )
-    elif risk_level == "medium":
-        return DecisionContract(
-            voting_strategy=VotingStrategy.MAJORITY,
-            min_votes=3,
-            approval_threshold=0.66
-        )
-    else:
-        return DecisionContract(
-            voting_strategy=VotingStrategy.MAJORITY,
-            min_votes=2,
-            approval_threshold=0.5
-        )
+class AdaptiveVotingStrategy:
+    @staticmethod
+    def evaluate_adaptive(
+        votes: dict[str, VoteDecision],
+        required_approvers: list[str],
+        weights: dict[str, float] | None = None,
+        context: dict = None
+    ) -> tuple[bool, str]:
+        """Adaptive strategy based on context."""
+        
+        # Get context information
+        priority = context.get("priority", "normal") if context else "normal"
+        confidence_threshold = context.get("confidence_threshold", 0.7) if context else 0.7
+        
+        approvals = sum(1 for v in votes.values() if v == VoteDecision.APPROVE)
+        total_votes = len(votes)
+        
+        if priority == "high":
+            # High priority requires unanimous approval
+            if approvals == total_votes and total_votes == len(required_approvers):
+                return True, "High priority: unanimous approval achieved"
+            return False, "High priority: unanimous approval required"
+        
+        elif priority == "low":
+            # Low priority requires single approval
+            if approvals >= 1:
+                return True, f"Low priority: approval received ({approvals})"
+            return False, "Low priority: at least one approval needed"
+        
+        else:
+            # Normal priority uses confidence-based threshold
+            confidence = approvals / total_votes if total_votes > 0 else 0
+            if confidence >= confidence_threshold:
+                return True, f"Confidence threshold met: {confidence:.2%}"
+            return False, f"Insufficient confidence: {confidence:.2%} < {confidence_threshold:.2%}"
 
-@with_oacp(
-    role="content_processor",
-    contract=lambda context: create_conditional_contract(
-        context.get("risk_level"), 
-        context.get("content_type")
-    )
-)
-def process_content(content, metadata):
-    return content_processing(content, metadata)
+# Register and use adaptive strategy
+VotingStrategy.register("adaptive", AdaptiveVotingStrategy.evaluate_adaptive)
+```
+
+## Strategy Selection Guidelines
+
+### Decision Matrix
+
+| Requirement | Unanimous | Majority | Weighted | Custom |
+|-------------|-----------|----------|----------|---------|
+| High Quality | ✓✓✓ | ✓✓ | ✓✓✓ | ✓✓ |
+| Fast Decisions | ✗ | ✓✓✓ | ✓✓ | ✓✓ |
+| Expert Input | ✓ | ✓ | ✓✓✓ | ✓✓✓ |
+| Risk Tolerance | Low | Medium | Low-Medium | Variable |
+| Complexity | Low | Low | Medium | High |
+
+### Selection Criteria
+
+#### Choose Unanimous When:
+- Zero tolerance for errors
+- Regulatory compliance required
+- High-stakes decisions
+- Small number of voters (≤5)
+- Trust in all voters is essential
+
+#### Choose Majority When:
+- Balanced decision-making needed
+- Time constraints exist
+- Democratic process desired
+- Large number of voters (5+)
+- Some disagreement is acceptable
+
+#### Choose Weighted When:
+- Expertise levels vary significantly
+- Hierarchical organization
+- Quality over speed priority
+- Clear authority structure exists
+- Specialized knowledge required
+
+#### Choose Custom When:
+- Standard strategies don't fit
+- Complex business rules
+- Adaptive behavior needed
+- Integration with external systems
+- Unique organizational requirements
+
+## Monitoring and Analytics
+
+### Strategy Performance
+
+```python
+from oacp.analytics import VotingAnalytics
+
+analytics = VotingAnalytics()
+
+# Analyze strategy effectiveness
+stats = analytics.get_strategy_stats("unanimous", days=30)
+print(f"Success rate: {stats.success_rate:.2%}")
+print(f"Average decision time: {stats.avg_decision_time}s")
+print(f"Timeout rate: {stats.timeout_rate:.2%}")
+
+# Compare strategies
+comparison = analytics.compare_strategies(["unanimous", "majority", "weighted"])
+for strategy, metrics in comparison.items():
+    print(f"{strategy}: {metrics.success_rate:.2%} success, {metrics.avg_time}s avg time")
+```
+
+### Voting Patterns
+
+```python
+# Analyze voter behavior
+voter_stats = analytics.get_voter_patterns("agent1", days=30)
+print(f"Participation rate: {voter_stats.participation_rate:.2%}")
+print(f"Approval rate: {voter_stats.approval_rate:.2%}")
+print(f"Average response time: {voter_stats.avg_response_time}s")
+
+# Identify bottlenecks
+bottlenecks = analytics.identify_bottlenecks()
+for voter, delay in bottlenecks.items():
+    print(f"{voter}: {delay}s average delay")
 ```
 
 ## Best Practices
 
-### 1. **Choose Strategy Based on Requirements**
+### Strategy Design
 
-```python
-# High-risk decisions: Unanimous
-if decision_risk == "high":
-    strategy = VotingStrategy.UNANIMOUS
-    min_votes = 3
+1. **Match Strategy to Use Case**: Choose based on requirements
+2. **Consider Voter Count**: More voters favor majority over unanimous
+3. **Balance Speed vs Quality**: Unanimous is thorough but slow
+4. **Plan for Failures**: Have timeout and fallback mechanisms
+5. **Test Strategies**: Validate with real scenarios
 
-# Medium-risk: Supermajority  
-elif decision_risk == "medium":
-    strategy = VotingStrategy.MAJORITY
-    approval_threshold = 0.66
+### Implementation
 
-# Low-risk: Simple majority
-else:
-    strategy = VotingStrategy.MAJORITY
-    approval_threshold = 0.5
-```
+1. **Clear Documentation**: Document voting criteria clearly
+2. **Reasonable Timeouts**: Balance thoroughness with efficiency
+3. **Fallback Plans**: Handle missing voters gracefully
+4. **Monitor Performance**: Track strategy effectiveness
+5. **Iterate and Improve**: Adjust based on outcomes
 
-### 2. **Configure Appropriate Timeouts**
+### Voter Guidelines
 
-```python
-# Quick decisions
-DecisionContract(timeout_seconds=10)
-
-# Complex analysis
-DecisionContract(timeout_seconds=120)
-
-# Critical reviews
-DecisionContract(timeout_seconds=300)
-```
-
-### 3. **Balance Voter Requirements**
-
-```python
-# Too few voters - unreliable
-DecisionContract(min_votes=1)  # ❌ Not recommended
-
-# Good balance
-DecisionContract(min_votes=3)  # ✅ Good for most cases
-
-# Too many voters - slow
-DecisionContract(min_votes=10) # ❌ May be too slow
-```
-
-### 4. **Monitor and Adjust**
-
-```python
-# Track voting patterns
-def analyze_voting_patterns():
-    stats = get_voting_statistics()
-    
-    if stats.avg_consensus_time > 60:
-        print("Consider lowering approval threshold")
-    
-    if stats.consensus_rate < 0.8:
-        print("Consider adjusting voting strategy")
-    
-    if stats.voter_participation < 0.9:
-        print("Consider reducing required voters")
-```
+1. **Timely Responses**: Vote within timeout periods
+2. **Clear Reasoning**: Provide actionable feedback
+3. **Consistent Standards**: Apply criteria consistently
+4. **Constructive Criticism**: Focus on improvement
+5. **Professional Conduct**: Maintain respectful discourse
 
 ## Troubleshooting
 
 ### Common Issues
 
-#### **Consensus Never Reached**
+#### Strategy Not Working
 ```python
-# Problem: Too strict requirements
-DecisionContract(
-    voting_strategy=VotingStrategy.UNANIMOUS,
-    min_votes=10,  # Too many required
-    timeout_seconds=10  # Too short
-)
+# Debug voting strategy
+from oacp.debug import debug_voting_strategy
 
-# Solution: Relax requirements
-DecisionContract(
-    voting_strategy=VotingStrategy.MAJORITY,
-    min_votes=5,
-    timeout_seconds=60
+result = debug_voting_strategy(run_id="your_run_id")
+print(f"Strategy: {result.strategy}")
+print(f"Votes: {result.votes}")
+print(f"Result: {result.consensus}")
+print(f"Reason: {result.reason}")
+```
+
+#### Timeout Issues
+```python
+# Increase timeout for complex decisions
+contract = decision_contract(
+    required_approvers=["agent1", "agent2"],
+    strategy="majority",
+    timeout_seconds=300  # 5 minutes
 )
 ```
 
-#### **Voters Not Participating**
+#### Weight Calibration
 ```python
-# Problem: Required voters not available
-DecisionContract(
-    required_voters=["expert1", "expert2", "expert3"]  # May not all be online
-)
+# Test weight distribution
+from oacp.testing import test_weights
 
-# Solution: Use min_votes instead
-DecisionContract(
-    min_votes=2,  # Any 2 voters can participate
-    voter_weights={"expert1": 2.0, "expert2": 2.0, "expert3": 1.0}
-)
+weights = {"senior": 0.6, "junior1": 0.2, "junior2": 0.2}
+result = test_weights(weights, required_approvers=["senior", "junior1", "junior2"])
+print(f"Weight distribution valid: {result.valid}")
+print(f"Potential issues: {result.warnings}")
 ```
-
-#### **Weighted Voting Imbalances**
-```python
-# Problem: Weights too extreme
-voter_weights = {
-    "expert": 10.0,  # Too high
-    "junior": 0.1    # Too low
-}
-
-# Solution: More balanced weights
-voter_weights = {
-    "expert": 2.0,
-    "junior": 1.0
-}
-```
-
-## Performance Considerations
-
-### Voting Strategy Performance
-
-| Strategy | Speed | Quality | Scalability | Complexity |
-|----------|-------|---------|-------------|------------|
-| Unanimous | Slow | High | Poor | Low |
-| Majority | Medium | Medium | Good | Low |
-| Weighted | Medium | High | Good | Medium |
-
-### Optimization Tips
-
-1. **Use appropriate timeouts** - Balance speed vs. thoroughness
-2. **Limit required voters** - Fewer dependencies = faster decisions
-3. **Cache voter weights** - Avoid recalculating weights repeatedly
-4. **Monitor metrics** - Track consensus rates and adjust strategies
-
-## Related Documentation
-
-- [Decision Contracts](../api/contracts.md) - Contract configuration details
-- [Voting System](../architecture/voting-system.md) - Technical implementation
-- [Examples](../examples/custom-voting.md) - Practical voting examples
-- [Monitoring](../web/dashboard.md) - Track voting performance

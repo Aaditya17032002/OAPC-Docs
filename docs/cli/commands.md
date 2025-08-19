@@ -1,482 +1,672 @@
-# OACP CLI Commands Reference
+# CLI Commands Reference
 
-The OACP Command Line Interface provides comprehensive tools for managing environments, monitoring workflows, and interacting with OACP systems. This page documents all available commands and their usage.
+OACP provides a comprehensive command-line interface for managing, monitoring, and analyzing your governance workflows.
 
-## Installation & Setup
+## Installation
 
-### Check CLI Installation
+The CLI is automatically installed with OACP:
+
 ```bash
-# Verify OACP CLI is available
-oacp --help
+pip install OACP
+```
 
-# Check version
+Verify installation:
+
+```bash
 oacp --version
+```
+
+## Command Overview
+
+```bash
+oacp --help
+```
+
+### Main Commands
+
+- `oacp logs` - View and analyze logs
+- `oacp stats` - Show system statistics  
+- `oacp monitor` - Real-time monitoring
+- `oacp export` - Export data
+- `oacp env` - Environment management
+- `oacp config` - Configuration management
+- `oacp web` - Web dashboard control
+
+## Log Management Commands
+
+### View Logs
+
+```bash
+# View recent logs
+oacp logs
+
+# Limit number of entries
+oacp logs --limit 50
+
+# Filter by role
+oacp logs --role researcher
+
+# Filter by run ID
+oacp logs --run-id 01K2YQ0W5Z
+
+# Filter by time range
+oacp logs --since "2024-01-01" --until "2024-01-02"
+
+# Follow logs in real-time
+oacp logs --follow
+
+# Filter by event type
+oacp logs --event-type VoteCast
+
+# Show only errors
+oacp logs --level ERROR
+```
+
+### Log Analysis
+
+```bash
+# Analyze log patterns
+oacp logs analyze
+
+# Find anomalies
+oacp logs anomalies --days 7
+
+# Generate log summary
+oacp logs summary --role researcher --days 30
+
+# Export logs
+oacp logs export --format json --output logs.json
+```
+
+### Examples
+
+```bash
+# View last 100 voting events
+oacp logs --event-type VoteCast --limit 100
+
+# Monitor researcher activity in real-time
+oacp logs --role researcher --follow
+
+# Analyze errors from last week
+oacp logs --level ERROR --since "1 week ago" analyze
+```
+
+## Monitoring & Analysis Commands
+
+### System Statistics
+
+```bash
+# Show overall statistics
+oacp stats
+
+# Role-specific statistics
+oacp stats --role researcher
+
+# Time-based statistics
+oacp stats --days 30
+
+# Detailed statistics
+oacp stats --detailed
+
+# Export statistics
+oacp stats --format json --output stats.json
+```
+
+### Real-time Monitoring
+
+```bash
+# Start monitoring dashboard
+oacp monitor
+
+# Monitor specific role
+oacp monitor --role synthesizer
+
+# Monitor with filters
+oacp monitor --event-type VoteCast
+
+# Monitor with custom refresh rate
+oacp monitor --refresh 5
+```
+
+### Voting Analysis
+
+```bash
+# Analyze voting patterns
+oacp votes analyze
+
+# Show voter statistics
+oacp votes --voter researcher --days 30
+
+# Consensus analysis
+oacp votes consensus --strategy unanimous
+
+# Voting trends
+oacp votes trends --days 90
+```
+
+### Performance Analysis
+
+```bash
+# Performance overview
+oacp performance
+
+# Identify bottlenecks
+oacp performance bottlenecks
+
+# Response time analysis
+oacp performance response-times --role analyst
+
+# Throughput analysis
+oacp performance throughput --days 7
 ```
 
 ## Environment Management Commands
 
-### `oacp env setup`
-Interactive environment setup for OACP projects.
+### Environment Configuration
 
 ```bash
-# Basic interactive setup
-oacp env setup
+# Show current environment
+oacp env show
 
-# Global configuration setup
-oacp env setup --global
+# Show all environment variables
+oacp env show --all
 
-# Force overwrite existing configuration
-oacp env setup --force
+# Set environment variable
+oacp env set OACP_STORAGE_TYPE sqlite
 
-# Custom storage path
-oacp env setup --storage file://custom/path
+# Get environment variable
+oacp env get OACP_STORAGE_TYPE
+
+# Unset environment variable
+oacp env unset OACP_STORAGE_TYPE
+
+# Reset to defaults
+oacp env reset
 ```
 
-**Options:**
-- `--global` - Setup global OACP environment configuration
-- `--storage PATH` - Custom storage path for logs and data
-- `--force` - Overwrite existing configuration without prompting
-
-**Example:**
-```bash
-oacp env setup --global --storage postgresql://user:pass@localhost/oacp
-```
-
-### `oacp env status`
-Display current environment status and configuration.
+### Environment Testing
 
 ```bash
-# Show environment status
-oacp env status
+# Test current configuration
+oacp env test
+
+# Test specific storage
+oacp env test --storage postgresql://user:pass@localhost/db
+
+# Validate environment
+oacp env validate
+
+# Environment health check
+oacp env health
 ```
 
-**Shows:**
-- OACP installation status and version
-- Environment variables status
-- Configuration file locations
-- API key status (masked for security)
-- Active configuration settings
-
-### `oacp env init`
-Initialize new OACP projects from templates.
+### Environment Templates
 
 ```bash
-# Interactive project creation
-oacp env init
+# List available templates
+oacp env templates
 
-# Create project with specific name
-oacp env init --name my-project
+# Apply template
+oacp env apply-template development
 
-# Use specific template
-oacp env init --name research-ai --template research
+# Create custom template
+oacp env create-template --name production --from-current
 
-# Available templates
-oacp env init --template basic      # Basic OACP project
-oacp env init --template research   # Research team workflow
-oacp env init --template multi-agent # Multi-agent system
+# Export environment
+oacp env export --output .env.backup
 ```
 
-**Options:**
-- `--name NAME` - Project name (directory will be created)
-- `--template TYPE` - Project template (basic, research, multi-agent)
+## Configuration Management
 
-## Monitoring & Analysis Commands
-
-### `oacp list`
-List recent OACP workflow runs.
-
-```bash
-# List last 10 runs
-oacp list
-
-# List more runs
-oacp list --limit 25
-
-# Filter by status
-oacp list --status completed
-oacp list --status failed
-oacp list --status running
-```
-
-**Options:**
-- `--limit, -l NUMBER` - Number of runs to display (default: 10)
-- `--status STATUS` - Filter by run status (completed, failed, running, cancelled)
-
-**Output:**
-```
-Run ID                     Status      Last Modified        Size      Events  Nodes
-01K2YT33MGV09DJPQCPN5FE8FE completed   2024-01-15 10:30:00  12.4KB    45      3
-01K2YT2VPBV7X9H7AHWA7R6CPM running     2024-01-15 10:25:00  8.1KB     28      2
-```
-
-### `oacp stats`
-Display statistics and metrics for OACP runs.
-
-```bash
-# Show stats for specific run
-oacp stats --run-id 01K2YT33MGV09DJPQCPN5FE8FE
-
-# Global stats for last 7 days (default)
-oacp stats
-
-# Global stats for custom time period
-oacp stats --days 30
-```
-
-**Options:**
-- `--run-id ID` - Show detailed stats for specific run
-- `--days NUMBER` - Show global stats for last N days (default: 7)
-
-**Output includes:**
-- Total events and unique nodes
-- Voting statistics (total votes, consensus rate)
-- Conflict and retry counts
-- Duration and performance metrics
-- Event type breakdown
-
-### `oacp config`
-Display current OACP configuration.
+### Configuration Commands
 
 ```bash
 # Show current configuration
-oacp config
+oacp config show
+
+# Validate configuration
+oacp config validate
+
+# Show configuration schema
+oacp config schema
+
+# Test configuration
+oacp config test
 ```
 
-**Shows:**
-- Storage configuration
-- Logging settings
-- Adaptive prompting settings
-- Environment variable sources
-- Sensitive values are masked for security
-
-## Log Management Commands
-
-### `oacp logs tail`
-Stream logs for specific OACP runs.
+### Configuration Migration
 
 ```bash
-# Tail logs for specific run
-oacp logs tail --run-id 01K2YT33MGV09DJPQCPN5FE8FE
+# Check for updates needed
+oacp config check-updates
 
-# Follow logs in real-time
-oacp logs tail --run-id 01K2YT33MGV09DJPQCPN5FE8FE --follow
+# Migrate configuration
+oacp config migrate --from-version 0.1.0 --to-version 0.2.0
 
-# Show more lines
-oacp logs tail --run-id 01K2YT33MGV09DJPQCPN5FE8FE --lines 100
+# Backup configuration
+oacp config backup --output config-backup.yaml
 
-# Filter by event type
-oacp logs tail --run-id 01K2YT33MGV09DJPQCPN5FE8FE --type VoteCast
+# Restore configuration
+oacp config restore --input config-backup.yaml
 ```
 
-**Options:**
-- `--run-id ID` - Run ID to tail (required)
-- `--follow, -f` - Follow log output in real-time
-- `--lines, -n NUMBER` - Number of lines to show (default: 50)
-- `--type TYPE` - Filter by event type (VoteCast, NodeStart, etc.)
+## Data Export & Import
 
-### `oacp logs timeline`
-Show timeline view of events for a run.
+### Export Commands
 
 ```bash
-# Show event timeline
-oacp logs timeline --run-id 01K2YT33MGV09DJPQCPN5FE8FE
+# Export all data
+oacp export --format json --output oacp-data.json
 
-# Output as JSON
-oacp logs timeline --run-id 01K2YT33MGV09DJPQCPN5FE8FE --format json
+# Export specific run
+oacp export --run-id 01K2YQ0W5Z --format json
 
-# Filter by event type
-oacp logs timeline --run-id 01K2YT33MGV09DJPQCPN5FE8FE --type DecisionFinalized
+# Export by date range
+oacp export --since "2024-01-01" --until "2024-01-31"
+
+# Export by role
+oacp export --role researcher --days 30
+
+# Export voting data only
+oacp export --type votes --format csv
+
+# Export with compression
+oacp export --format json --compress --output data.json.gz
 ```
 
-**Options:**
-- `--run-id ID` - Run ID to show timeline for (required)
-- `--format FORMAT` - Output format (table, json)
-- `--type TYPE` - Filter by event type
+### Import Commands
+
+```bash
+# Import data
+oacp import --input oacp-data.json
+
+# Import with validation
+oacp import --input data.json --validate
+
+# Import and merge
+oacp import --input data.json --merge
+
+# Dry run import
+oacp import --input data.json --dry-run
+```
 
 ## Web Dashboard Commands
 
-### `oacp serve`
-Start the OACP web dashboard and API server.
+### Dashboard Control
 
 ```bash
-# Start on default host and port (127.0.0.1:8000)
-oacp serve
+# Start web dashboard
+oacp web start
 
-# Custom host and port
-oacp serve --host 0.0.0.0 --port 8080
+# Start with custom port
+oacp web start --port 8080
 
-# Development mode with auto-reload
-oacp serve --reload
+# Start with custom host
+oacp web start --host 0.0.0.0 --port 8080
 
-# Production deployment
-oacp serve --host 0.0.0.0 --port 80
+# Start in background
+oacp web start --daemon
+
+# Stop dashboard
+oacp web stop
+
+# Restart dashboard
+oacp web restart
+
+# Show dashboard status
+oacp web status
 ```
 
-**Options:**
-- `--host HOST` - Host to bind to (default: 127.0.0.1)
-- `--port PORT` - Port to bind to (default: 8000)
-- `--reload` - Enable auto-reload for development
+### Dashboard Configuration
 
-**Access Points:**
-- **Dashboard**: http://localhost:8000
-- **API Docs**: http://localhost:8000/docs
-- **Health Check**: http://localhost:8000/health
-- **WebSocket**: ws://localhost:8000/ws
+```bash
+# Configure dashboard
+oacp web config --port 8080 --host localhost
+
+# Enable authentication
+oacp web config --auth-enabled --auth-secret your-secret
+
+# Set dashboard theme
+oacp web config --theme dark
+
+# Show dashboard configuration
+oacp web config show
+```
 
 ## Advanced Commands
 
-### `oacp replay`
-Replay OACP runs for debugging and analysis.
+### Debugging Tools
 
 ```bash
-# Show replay plan for a run
-oacp replay --run-id 01K2YT33MGV09DJPQCPN5FE8FE
+# Debug specific run
+oacp debug run 01K2YQ0W5Z
 
-# Dry run (show what would be replayed)
-oacp replay --run-id 01K2YT33MGV09DJPQCPN5FE8FE --dry-run
+# Debug voting process
+oacp debug voting --run-id 01K2YQ0W5Z
 
-# Start replay from specific event
-oacp replay --run-id 01K2YT33MGV09DJPQCPN5FE8FE --start-from 01K2YT34ABC123
+# Debug storage issues
+oacp debug storage
+
+# Debug configuration
+oacp debug config
+
+# Trace execution
+oacp debug trace --role researcher --limit 10
 ```
 
-**Options:**
-- `--run-id ID` - Run ID to replay (required)
-- `--dry-run` - Show replay plan without executing
-- `--start-from EVENT_ID` - Start replay from specific event ID
+### Replay Commands
 
-**Note:** Actual replay execution is planned for future releases.
+```bash
+# Replay specific run
+oacp replay run 01K2YQ0W5Z
+
+# Replay with modifications
+oacp replay run 01K2YQ0W5Z --modify-votes
+
+# Replay range of runs
+oacp replay --since "2024-01-01" --until "2024-01-02"
+
+# Dry run replay
+oacp replay run 01K2YQ0W5Z --dry-run
+```
+
+### Maintenance Commands
+
+```bash
+# Clean up old data
+oacp cleanup --older-than 90d
+
+# Compact storage
+oacp compact
+
+# Rebuild indexes
+oacp reindex
+
+# Verify data integrity
+oacp verify
+
+# Repair data issues
+oacp repair --auto-fix
+```
 
 ## Global Options
 
-All OACP commands support these global options:
+### Common Flags
 
 ```bash
-# Show help for any command
-oacp COMMAND --help
-
 # Verbose output
-oacp COMMAND --verbose
+oacp logs --verbose
 
-# Quiet mode (minimal output)
-oacp COMMAND --quiet
+# Quiet output
+oacp stats --quiet
+
+# Output format
+oacp stats --format json|yaml|table
+
+# Configuration file
+oacp --config ./custom-config.yaml logs
+
+# Storage override
+oacp --storage sqlite:///temp.db stats
+
+# Log level
+oacp --log-level DEBUG monitor
 ```
 
-## Command Examples by Use Case
-
-### **Project Setup**
-```bash
-# Create new research project
-oacp env init --name ai-research --template research
-cd ai-research
-
-# Set up environment
-oacp env setup
-
-# Check configuration
-oacp config
-oacp env status
-```
-
-### **Development Workflow**
-```bash
-# Start development dashboard
-oacp serve --reload
-
-# Monitor runs in another terminal
-oacp list
-oacp stats
-
-# Debug specific run
-oacp logs tail --run-id YOUR_RUN_ID --follow
-```
-
-### **Production Monitoring**
-```bash
-# Start production dashboard
-oacp serve --host 0.0.0.0 --port 8000
-
-# Monitor system health
-oacp stats --days 7
-oacp list --status failed
-
-# Analyze problematic runs
-oacp logs timeline --run-id FAILED_RUN_ID --format json
-```
-
-### **Debugging & Analysis**
-```bash
-# Find recent failed runs
-oacp list --status failed --limit 5
-
-# Analyze specific failure
-oacp stats --run-id FAILED_RUN_ID
-oacp logs tail --run-id FAILED_RUN_ID --lines 200
-
-# Show event timeline
-oacp logs timeline --run-id FAILED_RUN_ID --type VoteCast
-```
-
-## Environment Variables
-
-OACP CLI respects these environment variables:
+### Environment Variables
 
 ```bash
-# Core configuration
-OACP_STORAGE_URI=file://logs
-OACP_LOG_LEVEL=INFO
-OACP_ENABLE_ADAPTIVE_PROMPTING=true
+# Override default config
+export OACP_CONFIG_FILE=./custom-config.yaml
 
-# Web dashboard
-OACP_WEB_HOST=127.0.0.1
-OACP_WEB_PORT=8000
+# Override storage
+export OACP_STORAGE_URL=postgresql://user:pass@localhost/db
 
-# Database (if using PostgreSQL)
-OACP_DB_URL=postgresql://user:pass@localhost/oacp
+# Set log level
+export OACP_LOG_LEVEL=DEBUG
 
-# API keys
-OPENAI_API_KEY=your_key
-GOOGLE_API_KEY=your_key
-ANTHROPIC_API_KEY=your_key
+# Disable colors
+export OACP_NO_COLOR=1
 ```
 
 ## Configuration Files
 
-### Global Configuration
-- **Linux/Mac**: `~/.config/oacp/config.json`
-- **Windows**: `%APPDATA%\oacp\config.json`
+### CLI Configuration
+
+Create `~/.oacp/config.yaml`:
+
+```yaml
+# Default CLI settings
+default:
+  storage_type: sqlite
+  storage_url: sqlite:///~/.oacp/default.db
+  log_level: INFO
+  output_format: table
+
+# Environment-specific settings
+environments:
+  development:
+    storage_type: file
+    storage_path: ./dev_data
+    log_level: DEBUG
+  
+  production:
+    storage_type: postgresql
+    storage_url: postgresql://user:pass@prod-db/oacp
+    log_level: WARNING
+
+# Dashboard settings
+web:
+  default_port: 8000
+  default_host: localhost
+  theme: light
+  auth_enabled: false
+```
 
 ### Project Configuration
-- **Local**: `.oacp/config.json` (in project directory)
-- **Environment**: `.env` file (in project directory)
 
-## Exit Codes
+Create `oacp.yaml` in project root:
 
-OACP CLI commands use standard exit codes:
+```yaml
+# Project-specific OACP settings
+project:
+  name: my-oacp-project
+  version: 1.0.0
 
-- **0** - Success
-- **1** - General error
-- **2** - Misuse of shell command
-- **126** - Command invoked cannot execute
-- **127** - Command not found
-- **130** - Script terminated by Control-C
+storage:
+  type: sqlite
+  url: sqlite:///./project.db
+
+logging:
+  level: INFO
+  format: structured
+
+monitoring:
+  enabled: true
+  metrics:
+    - voting_patterns
+    - performance
+    - errors
+```
+
+## Scripting and Automation
+
+### Bash Integration
+
+```bash
+#!/bin/bash
+
+# Check OACP health
+if ! oacp env health --quiet; then
+    echo "OACP health check failed"
+    exit 1
+fi
+
+# Export daily report
+oacp export \
+    --since "yesterday" \
+    --format json \
+    --output "reports/daily-$(date +%Y%m%d).json"
+
+# Generate statistics
+oacp stats --days 1 --format yaml > "reports/daily-stats-$(date +%Y%m%d).yaml"
+```
+
+### Python Integration
+
+```python
+import subprocess
+import json
+
+def get_oacp_stats():
+    """Get OACP statistics via CLI."""
+    result = subprocess.run(
+        ["oacp", "stats", "--format", "json"],
+        capture_output=True,
+        text=True
+    )
+    return json.loads(result.stdout)
+
+def monitor_oacp():
+    """Monitor OACP in real-time."""
+    process = subprocess.Popen(
+        ["oacp", "monitor", "--format", "json"],
+        stdout=subprocess.PIPE,
+        text=True
+    )
+    
+    for line in process.stdout:
+        data = json.loads(line)
+        print(f"Event: {data['event_type']} at {data['timestamp']}")
+```
+
+## Examples and Use Cases
+
+### Daily Operations
+
+```bash
+# Morning health check
+oacp env health && oacp stats --days 1
+
+# Check for issues
+oacp logs --level ERROR --since "yesterday"
+
+# Monitor specific workflow
+oacp monitor --role synthesizer
+
+# End of day export
+oacp export --since "today" --output daily-backup.json
+```
+
+### Debugging Workflow
+
+```bash
+# Find failed runs
+oacp logs --level ERROR --event-type DecisionFinalized
+
+# Debug specific failure
+oacp debug run 01K2YQ0W5Z
+
+# Analyze voting patterns
+oacp votes analyze --days 7
+
+# Check system performance
+oacp performance bottlenecks
+```
+
+### Production Monitoring
+
+```bash
+# Start monitoring dashboard
+oacp web start --daemon --port 8080
+
+# Set up alerting (example with external tools)
+oacp stats --format json | jq '.error_rate' | \
+    awk '$1 > 0.05 { print "High error rate: " $1 }'
+
+# Regular health checks
+oacp env health || echo "OACP health check failed" | mail admin@company.com
+```
+
+### Data Analysis
+
+```bash
+# Export data for analysis
+oacp export --days 30 --format csv --output monthly-data.csv
+
+# Generate comprehensive report
+oacp stats --detailed --days 30 --format yaml > monthly-report.yaml
+
+# Analyze voting trends
+oacp votes trends --days 90 --format json > voting-trends.json
+```
 
 ## Troubleshooting
 
-### Command Not Found
-```bash
-# Verify installation
-pip list | grep -i oacp
+### Common Issues
 
-# Reinstall if necessary
-pip install --upgrade OACP
+#### Command Not Found
+
+```bash
+# Check installation
+pip list | grep OACP
+
+# Reinstall if needed
+pip install --force-reinstall OACP
 
 # Check PATH
-which oacp  # Linux/Mac
-where oacp  # Windows
+echo $PATH
 ```
 
-### Permission Errors
+#### Permission Errors
+
 ```bash
-# Use user installation
-pip install --user OACP
+# Check file permissions
+ls -la ~/.oacp/
 
-# Fix permissions (Linux/Mac)
-sudo chown -R $USER:$USER ~/.local
+# Fix permissions
+chmod 755 ~/.oacp/
+chmod 644 ~/.oacp/config.yaml
 ```
 
-### Storage Errors
+#### Configuration Issues
+
 ```bash
-# Check storage configuration
-oacp config
+# Validate configuration
+oacp config validate
 
-# Verify storage directory exists
-ls -la logs/  # Linux/Mac
-dir logs\     # Windows
+# Reset to defaults
+oacp env reset
 
-# Reset configuration
-oacp env setup --force
+# Test with minimal config
+oacp --storage sqlite:///:memory: stats
 ```
 
-### Web Dashboard Issues
+#### Storage Issues
+
 ```bash
-# Check if port is in use
-lsof -i :8000  # Linux/Mac
-netstat -ano | findstr :8000  # Windows
+# Test storage connection
+oacp env test
 
-# Use different port
-oacp serve --port 8001
+# Check storage health
+oacp debug storage
 
-# Check web dependencies
-pip install OACP[web]
+# Repair if needed
+oacp repair --auto-fix
 ```
 
-## Getting Help
+### Getting Help
 
-### Built-in Help
 ```bash
 # General help
 oacp --help
 
 # Command-specific help
-oacp env --help
 oacp logs --help
-oacp serve --help
+
+# Show version and debug info
+oacp --version --debug
+
+# List all available commands
+oacp --list-commands
 ```
-
-### Online Resources
-- **Documentation**: Complete guides at `/docs/`
-- **Examples**: Practical examples at `/docs/examples/`
-- **GitHub Issues**: Report bugs and get help
-- **Discussions**: Ask questions in GitHub Discussions
-
-### Support Channels
-- **GitHub Repository**: https://github.com/Aaditya17032002/OACP
-- **Issue Tracker**: Report bugs and request features
-- **Discussions**: Community support and questions
-
-## Advanced Usage
-
-### Scripting with OACP CLI
-```bash
-#!/bin/bash
-# Monitor OACP system health
-
-# Check for failed runs
-FAILED_RUNS=$(oacp list --status failed --limit 1 | grep -c failed)
-
-if [ "$FAILED_RUNS" -gt 0 ]; then
-    echo "Alert: Failed OACP runs detected"
-    oacp list --status failed --limit 5
-    exit 1
-fi
-
-echo "OACP system healthy"
-```
-
-### Integration with CI/CD
-```yaml
-# GitHub Actions example
-- name: Check OACP Health
-  run: |
-    oacp config
-    oacp stats --days 1
-    oacp list --status failed --limit 1
-```
-
-### Monitoring Scripts
-```python
-# Python monitoring script
-import subprocess
-import json
-
-def get_oacp_stats():
-    result = subprocess.run(['oacp', 'stats', '--days', '1'], 
-                          capture_output=True, text=True)
-    return json.loads(result.stdout)
-
-stats = get_oacp_stats()
-if stats['failed_runs'] > 0:
-    print("Alert: OACP failures detected")
-```
-
-The OACP CLI provides comprehensive tools for managing, monitoring, and debugging your multi-agent AI workflows. Use these commands to maintain visibility and control over your OACP deployments.
